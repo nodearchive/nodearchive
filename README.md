@@ -6,9 +6,9 @@
 # nodearchive
 
 `nodearchive` packs and unpacks `.nar`, `.zip`, `.tar`, `.tgz`, `.tar.gz`, and
-`.gz` from one ESM API and the `nar` CLI. Use it when a JavaScript build,
-release, or vendor-import flow needs one archive surface instead of a stack of
-one-format tools.
+`.gz` from one package surface for ESM, CommonJS, Bun, and the `nar` CLI. Use
+it when a JavaScript build, release, or vendor-import flow needs one archive
+tool instead of a stack of one-format packages.
 
 ## Install
 
@@ -55,12 +55,28 @@ await pack({ literalPath: ['src'], destinationPath: './app.nar' })
 await unpack({ path: './incoming.zip', destinationPath: './vendor' })
 ```
 
+CommonJS:
+
+```js
+const { pack, unpack } = require('@nodearchive/nodearchive')
+
+async function main() {
+  const archive = await pack({ blob: 'hello world' })
+  const restored = await unpack({ blob: archive })
+
+  console.log(Buffer.from(restored).toString('utf8'))
+}
+
+main()
+```
+
 ## Formats and runtime support
 
 - Writes: `.nar`, `.zip`, `.tar`, `.tgz`, `.tar.gz`, and `.gz`
 - Reads: `.nar`, `.zip`, `.tar`, `.tgz`, `.tar.gz`, and `.gz`
 - Runtimes: Node >= 18 and Bun
-- Module format: ESM-only package, `nar` CLI
+- Package entry points: ESM `import` and CommonJS `require()`
+- CLI: `nar`
 - Inputs: glob paths, exact paths, and in-memory bytes
 - Outputs: filesystem writes or memory return values
 
@@ -93,6 +109,21 @@ const archive = await pack({ blob: 'hello world' })
 const restored = await unpack({ blob: archive })
 
 console.log(Buffer.from(restored).toString('utf8'))
+```
+
+### CommonJS
+
+```js
+const { pack, unpack } = require('@nodearchive/nodearchive')
+
+async function main() {
+  const archive = await pack({ literalPath: ['src'] })
+  const restored = await unpack({ blob: archive })
+
+  console.log(restored.entries.length)
+}
+
+main()
 ```
 
 ### Alternative output formats

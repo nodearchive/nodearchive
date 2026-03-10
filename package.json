@@ -1,11 +1,13 @@
 {
   "name": "@nodearchive/nodearchive",
-  "version": "0.0.0",
-  "description": "Pack and unpack nar, zip, tar, tgz, tar.gz, and gz archives from Node.js, Bun, or the nar CLI.",
+  "version": "1.0.0",
+  "description": "Pack and unpack nar, zip, tar, tgz, tar.gz, and gz archives from one API and CLI for Node.js and Bun.",
   "keywords": [
     "archive",
     "bun",
     "cli",
+    "commonjs",
+    "esm",
     "gzip",
     "javascript",
     "nar",
@@ -16,12 +18,14 @@
   ],
   "license": "Apache-2.0",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist-cjs/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist-cjs/index.js",
+      "default": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -39,16 +43,18 @@
   "files": [
     "cli",
     "dist",
+    "dist-cjs",
     "LICENSE",
     "README.md"
   ],
   "scripts": {
+    "clean": "node scripts/cleanBuild/index.js",
     "format": "prettier . --write",
-    "build": "node scripts/updateVersion/index.js && tsc -p tsconfig.json",
-    "test:coverage": "node test/run-coverage.mjs",
+    "build": "npm run clean && node scripts/updateVersion/index.js && tsc -p tsconfig.json && tsc -p tsconfig.cjs.json && node scripts/writeCommonJSPackage/index.js",
+    "test:coverage": "npm run build && node test/run-coverage.mjs",
     "test:e2e": "node test/e2e/run.mjs",
-    "test": "node scripts/updateVersion/index.js && tsc -p tsconfig.json && node test/run-coverage.mjs && node test/e2e/run.mjs",
-    "bench": "node scripts/updateVersion/index.js && tsc -p tsconfig.json && node benchmark/bench.js",
+    "test": "npm run test:coverage && node test/e2e/run.mjs",
+    "bench": "npm run build && node benchmark/bench.js",
     "prepare": "husky",
     "prepublishOnly": "npm run test && npm run bench"
   },

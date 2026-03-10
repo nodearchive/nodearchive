@@ -6,7 +6,7 @@
     <title>nodearchive: In-depth pack() and unpack() guide</title>
     <meta
       name="description"
-      content="Reference for nodearchive pack() and unpack(): argument meanings, output formats, return values, dry runs, updates, and extraction rules."
+      content="Reference for nodearchive pack() and unpack(): argument meanings, output formats, ESM/CommonJS usage, return values, dry runs, updates, and extraction rules."
     />
     <meta
       name="keywords"
@@ -27,7 +27,7 @@
     />
     <meta
       property="og:description"
-      content="Reference for nodearchive pack() and unpack(), including argument behavior, output formats, return shapes, dry runs, updates, and extraction rules."
+      content="Reference for nodearchive pack() and unpack(), including argument behavior, output formats, ESM/CommonJS usage, return shapes, dry runs, updates, and extraction rules."
     />
     <meta property="og:site_name" content="nodearchive" />
     <meta property="og:locale" content="en_US" />
@@ -51,7 +51,7 @@
     />
     <meta
       name="twitter:description"
-      content="Reference for nodearchive pack() and unpack(), including argument behavior, output formats, and return shapes."
+      content="Reference for nodearchive pack() and unpack(), including argument behavior, output formats, ESM/CommonJS usage, and return shapes."
     />
     <meta
       name="twitter:image"
@@ -72,7 +72,7 @@
         "@context": "https://schema.org",
         "@type": "TechArticle",
         "headline": "nodearchive: In-depth pack() and unpack() guide",
-        "description": "Reference for nodearchive pack() and unpack(), including argument behavior, output formats, return shapes, dry runs, updates, and extraction rules.",
+        "description": "Reference for nodearchive pack() and unpack(), including argument behavior, output formats, ESM/CommonJS usage, return shapes, dry runs, updates, and extraction rules.",
         "image": "https://nodearchive.github.io/nodearchive/nodearchive_social_sharing_image.png",
         "url": "https://nodearchive.github.io/nodearchive/in-depth/",
         "mainEntityOfPage": "https://nodearchive.github.io/nodearchive/in-depth/",
@@ -447,7 +447,7 @@
       />
       <meta
         itemprop="description"
-        content="Reference for nodearchive pack() and unpack(): argument meanings, output formats, return values, dry runs, updates, and extraction rules."
+        content="Reference for nodearchive pack() and unpack(): argument meanings, output formats, ESM/CommonJS usage, return values, dry runs, updates, and extraction rules."
       />
       <link
         itemprop="url"
@@ -508,7 +508,8 @@
             <p itemprop="abstract">
               This page is the practical reference for `pack()` and `unpack()`.
               It explains how each argument affects source selection, write
-              behavior, return values, dry runs, updates, and extraction safety.
+              behavior, ESM and CommonJS usage, return values, dry runs,
+              updates, and extraction safety.
             </p>
             <nav class="page-nav" aria-label="In-depth sections">
               <a href="#pack">pack()</a>
@@ -525,7 +526,8 @@
             `pack()` creates archive output from in-memory data, glob-expanded
             paths, or exact filesystem paths. Native `.nar` is the default, and
             you can also target `.zip`, `.tar`, `.tgz`, `.tar.gz`, or `.gz`
-            output when that fits the workflow better.
+            output when that fits the workflow better. The package entry point
+            supports both ESM `import` and CommonJS `require()`.
           </p>
 
           <section>
@@ -745,7 +747,8 @@ nar pack ./src ./dist/app.nar -u -w</code></pre>
             `unpack()` reads archive data and either returns it in memory or
             writes the extracted files to disk. It reads native `.nar` payloads
             and also incoming `.zip`, `.tar`, `.tgz`, `.tar.gz`, and `.gz`
-            archives.
+            archives. The same entry point is available from ESM `import` and
+            CommonJS `require()`.
           </p>
 
           <section>

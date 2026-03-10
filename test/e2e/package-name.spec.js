@@ -44,24 +44,14 @@ test('renders the nodearchive landing document', async ({ page }) => {
     'npm i -g @nodearchive/nodearchive'
   )
   await expect(page.locator('#install .snippet')).toHaveCount(2)
-  await expect(page.locator('#api .snippet')).toHaveCount(3)
+  await expect(page.locator('#api .snippet')).toHaveCount(4)
   await expect(page.locator('#api')).toContainText('outFormat')
-  const apiSnippetLayout = await page.evaluate(() => {
-    const snippets = [
-      ...document.querySelectorAll('#api .snippet-grid .snippet'),
-    ].map((snippet) => snippet.getBoundingClientRect().width)
-
-    return {
-      viewportWidth: window.innerWidth,
-      firstWidth: snippets[0] ?? 0,
-      lastWidth: snippets[2] ?? 0,
-    }
-  })
-  if (apiSnippetLayout.viewportWidth > 960) {
-    expect(apiSnippetLayout.lastWidth).toBeGreaterThan(
-      apiSnippetLayout.firstWidth * 1.5
-    )
-  }
+  await expect(page.locator('#api')).toContainText('CommonJS')
+  await expect(page.locator('#api')).toContainText(
+    "require('@nodearchive/nodearchive')"
+  )
+  await expect(page.locator('#api')).toContainText('Output formats')
+  await expect(page.locator('#api')).toContainText('Memory mode')
   await expect(page.locator('a[href="/in-depth/"]').first()).toBeVisible()
   await expect(page.locator('a[href="/coverage"]').first()).toBeVisible()
   await expect(page.locator('.footer')).toContainText('Apache-2.0')
@@ -111,6 +101,8 @@ test('renders the in-depth guide with metadata and microdata', async ({
   await expect(page.locator('.page-nav')).toContainText('pack()')
   await expect(page.locator('.page-nav')).toContainText('unpack()')
   await expect(page.locator('.page-nav')).not.toContainText('Overview')
+  await expect(page.locator('#pack')).toContainText('CommonJS')
+  await expect(page.locator('#unpack')).toContainText('CommonJS')
   await expect(page.locator('.hero .snippet')).toHaveCount(0)
   await expect(page.locator('a[href="/coverage"]').first()).toBeVisible()
   await expect(page.locator('.footer')).toContainText('Apache-2.0')

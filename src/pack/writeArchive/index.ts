@@ -1,8 +1,8 @@
-import { fromJSON } from '@z-base/bytecodec'
 import { constants, gzip } from 'node:zlib'
 import { promisify } from 'node:util'
 import type { ArchiveManifest } from '../../.types/ArchiveManifest/type.js'
 import type { CompressionLevel } from '../../.types/PackArgs/type.js'
+import { readBytecodec } from '../../.helpers/readBytecodec/index.js'
 import { toNodearchiveError } from '../../.helpers/toNodearchiveError/index.js'
 
 const gzipAsync = promisify(gzip)
@@ -18,6 +18,7 @@ export async function writeArchive(
   compressionLevel: CompressionLevel = 'Optimal'
 ): Promise<Uint8Array> {
   try {
+    const { fromJSON } = await readBytecodec()
     const payload = fromJSON(manifest)
     const buffer = await gzipAsync(payload, {
       level: compressionLevels[compressionLevel],

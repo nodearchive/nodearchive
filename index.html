@@ -6,7 +6,7 @@
     <title>nodearchive: Pack and unpack nar, zip, tar, and gzip archives</title>
     <meta
       name="description"
-      content="Pack and unpack nar, zip, tar, tgz, tar.gz, and gz archives from one ESM API and the nar CLI for Node.js and Bun."
+      content="Pack and unpack nar, zip, tar, tgz, tar.gz, and gz archives from one package surface for ESM, CommonJS, Bun, and the nar CLI."
     />
     <meta
       name="keywords"
@@ -24,7 +24,7 @@
     />
     <meta
       property="og:description"
-      content="Pack and unpack nar, zip, tar, tgz, tar.gz, and gz archives with one small API and the nar CLI."
+      content="Pack and unpack nar, zip, tar, tgz, tar.gz, and gz archives from ESM, CommonJS, Bun, and the nar CLI."
     />
     <meta property="og:site_name" content="nodearchive" />
     <meta property="og:locale" content="en_US" />
@@ -48,7 +48,7 @@
     />
     <meta
       name="twitter:description"
-      content="Pack and unpack nar, zip, tar, tgz, tar.gz, and gz archives from one API and the nar CLI."
+      content="Pack and unpack nar, zip, tar, tgz, tar.gz, and gz archives from ESM, CommonJS, Bun, and the nar CLI."
     />
     <meta
       name="twitter:image"
@@ -70,7 +70,7 @@
         "@type": "SoftwareApplication",
         "name": "nodearchive",
         "applicationCategory": "DeveloperApplication",
-        "description": "Pack and unpack nar, zip, tar, tgz, tar.gz, and gz archives from one ESM API and the nar CLI for Node.js and Bun.",
+        "description": "Pack and unpack nar, zip, tar, tgz, tar.gz, and gz archives from one package surface for ESM, CommonJS, Bun, and the nar CLI.",
         "downloadUrl": "https://www.npmjs.com/package/@nodearchive/nodearchive",
         "image": "https://nodearchive.github.io/nodearchive/nodearchive_social_sharing_image.png",
         "codeRepository": "https://github.com/nodearchive/nodearchive",
@@ -398,10 +398,6 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
-      .api-snippet-grid .snippet:last-child {
-        grid-column: 1 / -1;
-      }
-
       .snippet {
         background: #182329;
         border-color: rgba(223, 247, 222, 0.14);
@@ -523,7 +519,7 @@
       <meta itemprop="name" content="nodearchive" />
       <meta
         itemprop="description"
-        content="Pack and unpack nar, zip, tar, tgz, tar.gz, and gz archives from one ESM API and the nar CLI for Node.js and Bun."
+        content="Pack and unpack nar, zip, tar, tgz, tar.gz, and gz archives from one package surface for ESM, CommonJS, Bun, and the nar CLI."
       />
       <meta itemprop="applicationCategory" content="DeveloperApplication" />
       <meta itemprop="operatingSystem" content="Node.js, Bun" />
@@ -591,9 +587,9 @@
             </h1>
             <p itemprop="abstract">
               Create `.nar`, `.zip`, `.tar`, `.tgz`, `.tar.gz`, or `.gz` output
-              from files, directories, or bytes already in memory. Read the same
-              formats through the same API and `nar` CLI without bolting
-              together one-format tools.
+              from files, directories, or bytes already in memory. Use the same
+              package from ESM `import`, CommonJS `require()`, or the `nar` CLI
+              without bolting together one-format tools.
             </p>
             <div class="hero-actions">
               <a
@@ -647,7 +643,7 @@ await unpack({ path: './incoming.zip', destinationPath: './vendor' })</code></pr
         <article class="card">
           <strong>One surface</strong>
           <span>
-            `pack()` and `unpack()` stay aligned across application code and the
+            `pack()` and `unpack()` stay aligned across ESM, CommonJS, and the
             `nar` CLI.
           </span>
         </article>
@@ -729,14 +725,15 @@ nar unpack ./dist/app.nar ./preview --whatIf --passThru</code></pre>
           <h2>API</h2>
           <p class="lede">
             The API stays small on purpose: `pack()` writes archives, `unpack()`
-            reads them, and `outFormat` switches the pack target when `.nar` is
-            not the format you want.
+            reads them, the package works from both `import` and `require()`,
+            and `outFormat` switches the pack target when `.nar` is not the
+            format you want.
           </p>
-          <div class="snippet-grid api-snippet-grid">
+          <div class="snippet-grid">
             <article class="snippet">
               <div class="snippet-header">
-                <strong>Pack and unpack</strong>
-                <span>esm</span>
+                <strong>ESM</strong>
+                <span>import</span>
               </div>
               <pre><code>import { pack, unpack } from '@nodearchive/nodearchive'
 
@@ -754,12 +751,26 @@ await unpack({
             </article>
             <article class="snippet">
               <div class="snippet-header">
-                <strong>Alternative output formats</strong>
-                <span>esm</span>
+                <strong>CommonJS</strong>
+                <span>require</span>
               </div>
-              <pre><code>import { pack } from '@nodearchive/nodearchive'
+              <pre><code>const { pack, unpack } = require('@nodearchive/nodearchive')
 
-await pack({
+async function main() {
+  const archive = await pack({ blob: 'hello world' })
+  const restored = await unpack({ blob: archive })
+
+  console.log(Buffer.from(restored).toString('utf8'))
+}
+
+main()</code></pre>
+            </article>
+            <article class="snippet">
+              <div class="snippet-header">
+                <strong>Output formats</strong>
+                <span>esm + cjs</span>
+              </div>
+              <pre><code>await pack({
   literalPath: ['src'],
   destinationPath: './dist/app.zip',
   outFormat: 'zip',
@@ -772,19 +783,13 @@ await pack({
             </article>
             <article class="snippet">
               <div class="snippet-header">
-                <strong>Memory mode and incoming archives</strong>
-                <span>esm</span>
+                <strong>Memory mode</strong>
+                <span>esm + cjs</span>
               </div>
-              <pre><code>import { pack, unpack } from '@nodearchive/nodearchive'
-
-const archive = await pack({ blob: 'hello world' })
+              <pre><code>const archive = await pack({ blob: 'hello world' })
 const restored = await unpack({ blob: archive })
 
-await unpack({
-  path: './incoming.tar.gz',
-  destinationPath: './vendor',
-  force: true,
-})</code></pre>
+console.log(Buffer.from(restored).toString('utf8'))</code></pre>
             </article>
           </div>
         </section>

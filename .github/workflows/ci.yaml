@@ -62,6 +62,13 @@ jobs:
           const restored = await unpack({ blob: archive });
           const text = new TextDecoder().decode(restored);
           if (text !== 'bun-smoke') throw new Error(text);"
+          bun --eval "const { pack, unpack } = require('.');
+          await (async () => {
+            const archive = await pack({ blob: 'bun-cjs-smoke' });
+            const restored = await unpack({ blob: archive });
+            const text = Buffer.from(restored).toString('utf8');
+            if (text !== 'bun-cjs-smoke') throw new Error(text);
+          })();"
 
   test-e2e:
     name: Playwright

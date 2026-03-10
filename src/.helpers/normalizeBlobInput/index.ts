@@ -1,11 +1,12 @@
-import { fromString, toUint8Array } from '@z-base/bytecodec'
 import { NodearchiveError } from '../../.errors/class.js'
 import type { BlobInput } from '../../.types/PackArgs/type.js'
+import { readBytecodec } from '../readBytecodec/index.js'
 
 export async function normalizeBlobInput(
   input: BlobInput
 ): Promise<Uint8Array> {
   if (typeof input === 'string') {
+    const { fromString } = await readBytecodec()
     return fromString(input)
   }
 
@@ -21,6 +22,7 @@ export async function normalizeBlobInput(
   }
 
   try {
+    const { toUint8Array } = await readBytecodec()
     return toUint8Array(
       input as Exclude<BlobInput, Blob | SharedArrayBuffer | string>
     )

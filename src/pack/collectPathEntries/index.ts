@@ -106,7 +106,9 @@ async function expandGlobs(values: string[]): Promise<string[]> {
     return []
   }
 
-  const { default: fg } = await import('fast-glob')
+  const { default: fg } = (await import('fast-glob')) as {
+    default: typeof import('fast-glob')
+  }
   return fg(values, {
     cwd: process.cwd(),
     dot: true,

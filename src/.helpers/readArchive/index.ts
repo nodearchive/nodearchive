@@ -1,11 +1,12 @@
-import { fromCompressed, toJSON } from '@z-base/bytecodec'
 import type { ArchiveEntry } from '../../.types/ArchiveEntry/type.js'
 import type { ArchiveManifest } from '../../.types/ArchiveManifest/type.js'
 import { NodearchiveError } from '../../.errors/class.js'
+import { readBytecodec } from '../readBytecodec/index.js'
 import { toNodearchiveError } from '../toNodearchiveError/index.js'
 
 export async function readArchive(bytes: Uint8Array): Promise<ArchiveManifest> {
   try {
+    const { fromCompressed, toJSON } = await readBytecodec()
     const manifest = toJSON(await fromCompressed(bytes)) as Partial<
       ArchiveManifest & {
         entries: Partial<ArchiveEntry>[]
