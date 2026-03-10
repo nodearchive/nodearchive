@@ -8,6 +8,9 @@ import { fileURLToPath } from 'node:url'
 
 const repoRoot = fileURLToPath(new URL('../..', import.meta.url))
 const cliPath = path.join(repoRoot, 'cli', 'index.js')
+const { version: packageVersion } = JSON.parse(
+  await readFile(path.join(repoRoot, 'package.json'), 'utf8')
+)
 
 test('cli prints help and version', async () => {
   const help = runCli(['--help'])
@@ -22,7 +25,7 @@ test('cli prints help and version', async () => {
 
   const version = runCli(['--version'])
   assert.equal(version.status, 0)
-  assert.equal(version.stdout.trim(), '0.0.0')
+  assert.equal(version.stdout.trim(), packageVersion)
 })
 
 test('cli packs and unpacks archives with positionals and flags', async () => {

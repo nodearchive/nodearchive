@@ -3,11 +3,18 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import fastGlob from 'fast-glob'
 
 const c8Path = fileURLToPath(
   new URL('../node_modules/c8/bin/c8.js', import.meta.url)
 )
 const tempDirectory = await mkdtemp(path.join(tmpdir(), 'nodearchive-c8-'))
+const testFiles = await fastGlob(
+  ['test/unit/*.test.js', 'test/integration/*.test.js'],
+  {
+    onlyFiles: true,
+  }
+)
 
 await rm('coverage', { force: true, recursive: true })
 
@@ -26,8 +33,7 @@ try {
       tempDirectory,
       process.execPath,
       '--test',
-      'test/unit/*.test.js',
-      'test/integration/*.test.js',
+      ...testFiles,
     ],
     {
       stdio: 'inherit',
