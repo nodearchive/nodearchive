@@ -1,12 +1,12 @@
 {
-  "name": "@z-base/package-name",
+  "name": "@nodearchive/nodearchive",
   "version": "0.0.0",
   "description": "",
   "keywords": [
     "typescript",
     "z-base"
   ],
-  "license": "MIT",
+  "license": "Apache-2.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,15 +17,19 @@
     },
     "./package.json": "./package.json"
   },
+  "bin": {
+    "archive": "./cli/index.js"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/<entity>/<package-name>.git"
+    "url": "git+https://github.com/nodearchive/nodearchive.git"
   },
   "bugs": {
-    "url": "https://github.com/<entity>/<package-name>/issues"
+    "url": "https://github.com/nodearchive/nodearchive/issues"
   },
-  "homepage": "https://z-base.github.io/<package-name>",
+  "homepage": "https://nodearchive.github.io/nodearchive",
   "files": [
+    "cli",
     "dist",
     "LICENSE",
     "README.md"
@@ -55,20 +59,15 @@
     "node": ">=18"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.3.1",
-    "@commitlint/config-conventional": "^20.3.1",
+    "@commitlint/cli": "^20.4.3",
+    "@commitlint/config-conventional": "^20.4.3",
     "@playwright/test": "^1.58.2",
-    "@types/node": "^25.2.3",
-    "c8": "^10.1.3",
+    "@types/node": "^25.4.0",
+    "c8": "^11.0.0",
     "fast-glob": "^3.3.3",
     "husky": "^9.1.7",
     "playwright": "^1.58.2",
     "prettier": "^3.8.1",
     "typescript": "^5.6.3"
-  },
-  "dependencies": {
-    "@z-base/bytecodec": "^1.1.0",
-    "@z-base/cryptosuite": "^1.0.1",
-    "@z-base/zero-knowledge-credentials": "^1.0.2"
   }
 }
