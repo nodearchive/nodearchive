@@ -52,8 +52,12 @@ test('renders the nodearchive landing document', async ({ page }) => {
   )
   await expect(page.locator('#api')).toContainText('Output formats')
   await expect(page.locator('#api')).toContainText('Memory mode')
-  await expect(page.locator('a[href="/in-depth/"]').first()).toBeVisible()
-  await expect(page.locator('a[href="/coverage"]').first()).toBeVisible()
+  await expect(
+    page.locator('a[href="/nodearchive/in-depth/"]').first()
+  ).toBeVisible()
+  await expect(
+    page.locator('a[href="/nodearchive/coverage/"]').first()
+  ).toBeVisible()
   await expect(page.locator('.footer')).toContainText('Apache-2.0')
   await expect(page.locator('.footer')).toContainText(
     '@nodearchive/nodearchive'
@@ -104,7 +108,9 @@ test('renders the in-depth guide with metadata and microdata', async ({
   await expect(page.locator('#pack')).toContainText('CommonJS')
   await expect(page.locator('#unpack')).toContainText('CommonJS')
   await expect(page.locator('.hero .snippet')).toHaveCount(0)
-  await expect(page.locator('a[href="/coverage"]').first()).toBeVisible()
+  await expect(
+    page.locator('a[href="/nodearchive/coverage/"]').first()
+  ).toBeVisible()
   await expect(page.locator('.footer')).toContainText('Apache-2.0')
   await expect(page.locator('.footer')).toContainText(
     '@nodearchive/nodearchive'
