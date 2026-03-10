@@ -1,18 +1,22 @@
-export function buildArgOptions(paramNames) {
+import { makeShortArg } from '../makeShortArg/index.js'
+
+export function buildArgOptions(schema) {
   const used = new Set()
 
   return Object.fromEntries(
-    paramNames.map((name) => {
-      const short = makeShort(name, used)
+    Object.entries(schema).map(([name, option]) => {
+      const short = option.short ?? makeShortArg(name, used)
+
+      if (short) {
+        used.add(short)
+      }
 
       return [
         name,
         short === undefined
-          ? {
-              type: 'string',
-            }
+          ? { ...option }
           : {
-              type: 'string',
+              ...option,
               short,
             },
       ]

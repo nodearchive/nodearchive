@@ -3,651 +3,179 @@
 [![codecov](https://codecov.io/gh/nodearchive/nodearchive/branch/master/graph/badge.svg)](https://codecov.io/gh/nodearchive/nodearchive)
 [![license](https://img.shields.io/npm/l/@nodearchive/nodearchive)](LICENSE)
 
-1. Title
-
 # nodearchive
 
-2. Description
+`nodearchive` packs and unpacks `.nar`, `.zip`, `.tar`, `.tgz`, `.tar.gz`, and
+`.gz` from one ESM API and the `nar` CLI. Use it when a JavaScript build,
+release, or vendor-import flow needs one archive surface instead of a stack of
+one-format tools.
 
-1–2 sentences:
-
-what it is
-
-what it’s for
-
-(optional) what it’s not for
-
-3. Compatibility
-
-A small bullet list, always in this order:
-
-Runtimes: Node >= X; Browsers: <notes>; Workers/Edge: <notes>
-
-Module format: ESM/CJS
-
-Required globals / APIs: crypto.subtle, CompressionStream, indexedDB, etc.
-
-TypeScript: bundled types / source TS / etc.
-
-4. Goals
-
-3–6 bullets, phrased as outcomes:
-
-“Developer-friendly API…”
-
-“No deps…”
-
-“Returns copies for safety…”
-
-5. Installation
-
-Always the same triple:
-
-npm install <name>
-
-# or
-
-pnpm add <name>
-
-# or
-
-yarn add <name>
-
-6. Usage
-
-Smallest runnable example (the “copy/paste test”)
-
-Common patterns: 2–5 short subsections max (don’t turn this into an API book)
-
-7. Runtime behavior
-
-This is where you put the “how it behaves in different environments” and “what errors look like”.
-
-Use a consistent set of subheadings when relevant:
-
-Node
-
-Browsers / Edge runtimes
-
-Validation & errors
-
-Safety / copying semantics
-
-Caching semantics (if applicable)
-
-8. Tests
-
-This section should answer:
-
-What test types exist? (unit / integration / e2e / type tests)
-
-Where do they run? (Node versions; browser matrix)
-
-Coverage: tool + percentage (and what it measures)
-
-Status claim: “passes on …” (keep it factual)
-
-Example format:
-
-Suite: unit (Node), integration, E2E (Playwright)
-
-Matrix: Chromium / Firefox / WebKit (+ mobile emulation if you do it)
-
-Coverage: c8 — 100% statements/branches/functions/lines (Node)
-
-Notes: any known skips
-
-9. Benchmarks
-
-This should show actual numbers, plus reproduction context.
-
-Minimum content:
-
-How it was run: command
-
-Environment: runtime version + platform
-
-Results: table or block of key ops/s or timings
-
-Disclaimer: results vary by machine
-
-10. License
-
-One line. Always last.
-
-EXAMPLES:
-
-1.
-
-[![npm version](https://img.shields.io/npm/v/@nodearchive/bytecodec)](https://www.npmjs.com/package/@nodearchive/bytecodec)
-[![CI](https://github.com/z-base/bytecodec/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/z-base/bytecodec/actions/workflows/ci.yaml)
-[![codecov](https://codecov.io/gh/z-base/bytecodec/branch/master/graph/badge.svg)](https://codecov.io/gh/z-base/bytecodec)
-[![license](https://img.shields.io/npm/l/@z-base/bytecodec)](LICENSE)
-
-# bytecodec
-
-Typed JavaScript byte utilities for base64url, UTF-8 strings, JSON, and gzip that behave the same in browsers and Node. Built to make JavaScript/TypeScript projects with lots of byte-format data a breeze to build, without having to write your own utilities or boilerplate.
-
-## Compatibility
-
-- Runtimes: Node >= 18; Browsers: modern browsers with TextEncoder/TextDecoder + btoa/atob; Workers/Edge: runtimes with TextEncoder/TextDecoder + btoa/atob (gzip needs CompressionStream/DecompressionStream).
-- Module format: ESM-only (no CJS build).
-- Required globals / APIs: Node `Buffer` (base64/UTF-8 fallback); browser/edge `TextEncoder`, `TextDecoder`, `btoa`, `atob`; gzip in browser/edge needs `CompressionStream`/`DecompressionStream`.
-- TypeScript: bundled types.
-
-## Goals
-
-- Developer-friendly API for base64url, UTF-8, JSON, gzip, concat, and equality.
-- No dependencies or bundler shims.
-- ESM-only and side-effect free for tree-shaking.
-- Returns copies for safety when normalizing inputs.
-- Consistent behavior across Node, browsers, and edge runtimes.
-
-## Installation
+## Install
 
 ```sh
-npm install @z-base/bytecodec
+npm install @nodearchive/nodearchive
+pnpm add @nodearchive/nodearchive
+yarn add @nodearchive/nodearchive
+bun add @nodearchive/nodearchive
+```
+
+Global CLI:
+
+```sh
+npm install --global @nodearchive/nodearchive
 # or
-pnpm add @z-base/bytecodec
-# or
-yarn add @z-base/bytecodec
+bun add --global @nodearchive/nodearchive
 ```
 
-## Usage
+Run once without a global install:
 
-### Bytes wrapper
+```sh
+npx @nodearchive/nodearchive pack --help
+bunx @nodearchive/nodearchive unpack --help
+```
+
+## Quick start
+
+CLI:
+
+```sh
+npm i -g @nodearchive/nodearchive
+nar --help
+
+nar pack ./src ./app.nar
+nar unpack ./incoming.zip ./vendor
+```
+
+Code:
 
 ```js
-import { Bytes } from '@z-base/bytecodec'
-// The `Bytes` convenience class wraps the same functions as static methods.
-const encoded = Bytes.toBase64UrlString(new Uint8Array([1, 2, 3]))
+import { pack, unpack } from '@nodearchive/nodearchive'
+
+await pack({ literalPath: ['src'], destinationPath: './app.nar' })
+await unpack({ path: './incoming.zip', destinationPath: './vendor' })
 ```
 
-### Base64URL
+## Formats and runtime support
+
+- Writes: `.nar`, `.zip`, `.tar`, `.tgz`, `.tar.gz`, and `.gz`
+- Reads: `.nar`, `.zip`, `.tar`, `.tgz`, `.tar.gz`, and `.gz`
+- Runtimes: Node >= 18 and Bun
+- Module format: ESM-only package, `nar` CLI
+- Inputs: glob paths, exact paths, and in-memory bytes
+- Outputs: filesystem writes or memory return values
+
+## Examples
+
+### Filesystem output
 
 ```js
-import { toBase64UrlString, fromBase64UrlString } from '@z-base/bytecodec'
+import { pack, unpack } from '@nodearchive/nodearchive'
 
-const bytes = new Uint8Array([104, 101, 108, 108, 111])
-const encoded = toBase64UrlString(bytes) // string of base64url chars
-const decoded = fromBase64UrlString(encoded) // Uint8Array
+await pack({
+  literalPath: ['src', 'package.json'],
+  destinationPath: './dist/app.nar',
+  force: true,
+})
+
+await unpack({
+  path: './dist/app.nar',
+  destinationPath: './out',
+  force: true,
+})
 ```
 
-### UTF-8 strings
+### In-memory bytes
 
 ```js
-import { fromString, toString } from '@z-base/bytecodec'
+import { pack, unpack } from '@nodearchive/nodearchive'
 
-const textBytes = fromString('caffe and rockets') // Uint8Array
-const text = toString(textBytes) // "caffe and rockets"
+const archive = await pack({ blob: 'hello world' })
+const restored = await unpack({ blob: archive })
+
+console.log(Buffer.from(restored).toString('utf8'))
 ```
 
-### JSON
+### Alternative output formats
 
 ```js
-import { fromJSON, toJSON } from '@z-base/bytecodec'
+import { pack } from '@nodearchive/nodearchive'
 
-const jsonBytes = fromJSON({ ok: true, count: 3 }) // Uint8Array
-const obj = toJSON(jsonBytes) // { ok: true, count: 3 }
+await pack({
+  literalPath: ['src'],
+  destinationPath: './dist/app.zip',
+  outFormat: 'zip',
+})
+
+await pack({
+  literalPath: ['src'],
+  destinationPath: './dist/app.tgz',
+})
 ```
 
-### Compression
+### Incoming zip or tarball
 
 ```js
-import { toCompressed, fromCompressed } from '@z-base/bytecodec'
+import { unpack } from '@nodearchive/nodearchive'
 
-const compressed = await toCompressed(new Uint8Array([1, 2, 3])) // Uint8Array
-const restored = await fromCompressed(compressed) // Uint8Array
+await unpack({
+  path: './vendor/release.tar.gz',
+  destinationPath: './vendor/release',
+  force: true,
+})
 ```
 
-### Normalization
+### CLI
 
-```js
-import { toUint8Array, toArrayBuffer, toBufferSource } from '@z-base/bytecodec'
-
-const normalized = toUint8Array([1, 2, 3]) // Uint8Array
-const copied = toArrayBuffer(normalized) // ArrayBuffer
-const bufferSource = toBufferSource(normalized) // Uint8Array as BufferSource
+```sh
+nar pack ./src ./dist/app.nar --passThru
+nar pack ./src ./dist/app.zip --outFormat zip --passThru
+nar unpack ./dist/app.nar ./out --force --passThru
+nar unpack ./incoming.zip ./out --force
+nar pack --help
+npx @nodearchive/nodearchive pack --help
+bunx @nodearchive/nodearchive unpack --help
 ```
 
-### Equality
+## Behavior
 
-```js
-import { equals } from '@z-base/bytecodec'
+- `pack()` writes `.nar`, `.zip`, `.tar`, `.tgz`, `.tar.gz`, and `.gz`.
+- `unpack()` reads `.nar`, `.zip`, `.tar`, `.tgz`, `.tar.gz`, and `.gz`.
+- `outFormat` selects the output archive type. `destinationPath` also infers the format from supported extensions.
+- `.gz` output is limited to a single input. `update` is limited to native `.nar` output.
+- In-memory mode accepts strings, blobs, typed arrays, `ArrayBuffer`, and `SharedArrayBuffer`.
+- `path` uses glob expansion through `fast-glob`; `literalPath` stays exact.
+- Validation failures throw `NodearchiveError` codes such as
+  `ARCHIVE_INPUT_REQUIRED`, `ARCHIVE_INVALID_FORMAT`,
+  `ARCHIVE_DESTINATION_EXISTS`, and `ARCHIVE_ENTRY_PATH_INVALID`.
+- Unsafe extraction paths and unsupported entry types are rejected instead of being silently rewritten.
 
-const isSame = equals(new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])) // true | false
-```
+## Reference
 
-### Concatenating
+- Landing page: <https://nodearchive.github.io/nodearchive/>
+- In-depth guide: <https://nodearchive.github.io/nodearchive/in-depth/>
+- Coverage report: <https://nodearchive.github.io/nodearchive/coverage/>
 
-```js
-import { concat } from '@z-base/bytecodec'
+## Quality signals
 
-const joined = concat([new Uint8Array([1, 2]), new Uint8Array([3, 4]), [5, 6]]) // Uint8Array
-```
-
-## Runtime behavior
-
-### Node
-
-Uses `Buffer.from` for base64 and `TextEncoder`/`TextDecoder` when available, with `Buffer` fallback; gzip uses `node:zlib`.
-
-### Browsers / Edge runtimes
-
-Uses `TextEncoder`/`TextDecoder` and `btoa`/`atob`. Gzip uses `CompressionStream`/`DecompressionStream` when available.
-
-### Validation & errors
-
-Validation failures throw `BytecodecError` with a `code` string (for example `BASE64URL_INVALID_LENGTH`, `UTF8_DECODER_UNAVAILABLE`, `GZIP_COMPRESSION_UNAVAILABLE`), while underlying runtime errors may bubble through.
-
-### Safety / copying semantics
-
-Normalization helpers return copies (`Uint8Array`/`ArrayBuffer`) to avoid mutating caller-owned buffers.
-
-## Tests
-
-Suite: unit + integration (Node), E2E (Playwright)
-Matrix: Chromium / Firefox / WebKit + mobile emulation (Pixel 5, iPhone 12)
-Coverage: c8 — 100% statements/branches/functions/lines (Node)
-Notes: no known skips
+- Suite: unit + integration (Node), E2E (Playwright), Bun smoke
+- Matrix: Node 18 / 20 / 22; Chromium / Firefox / WebKit plus mobile emulation
+- Coverage: c8 at 100% statements, branches, functions, and lines
+- Reports: `coverage/lcov.info` and `coverage/index.html`
 
 ## Benchmarks
 
-How it was run: `node benchmark/bench.js`
-Environment: Node v22.14.0 (win32 x64)
-Results:
+Command: `npm run bench`
+Environment: Node `v22.14.0` on `win32 x64`
 
-| Benchmark        | Result                     |
-| ---------------- | -------------------------- |
-| base64 encode    | 514,743 ops/s (97.1 ms)    |
-| base64 decode    | 648,276 ops/s (77.1 ms)    |
-| utf8 encode      | 1,036,895 ops/s (48.2 ms)  |
-| utf8 decode      | 2,893,954 ops/s (17.3 ms)  |
-| json encode      | 698,985 ops/s (28.6 ms)    |
-| json decode      | 791,690 ops/s (25.3 ms)    |
-| concat 3 buffers | 617,497 ops/s (81.0 ms)    |
-| toUint8Array     | 10,149,502 ops/s (19.7 ms) |
-| toArrayBuffer    | 620,992 ops/s (322.1 ms)   |
-| toBufferSource   | 8,297,585 ops/s (24.1 ms)  |
-| equals same      | 4,035,195 ops/s (49.6 ms)  |
-| equals diff      | 2,760,784 ops/s (72.4 ms)  |
-| gzip compress    | 10,275 ops/s (38.9 ms)     |
-| gzip decompress  | 18,615 ops/s (21.5 ms)     |
+| Benchmark        | Result                       |
+| ---------------- | ---------------------------- |
+| `pack blob`      | `3,170.28 ops/s (126.17 ms)` |
+| `unpack blob`    | `3,306.20 ops/s (120.98 ms)` |
+| `pack directory` | `309.35 ops/s (387.91 ms)`   |
+| `unpack archive` | `4,109.76 ops/s (29.20 ms)`  |
 
 Results vary by machine.
 
 ## License
 
-Apache
-
-2.
-
-[![npm version](https://img.shields.io/npm/v/@z-base/cryptosuite)](https://www.npmjs.com/package/@z-base/cryptosuite)
-[![CI](https://github.com/z-base/cryptosuite/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/z-base/cryptosuite/actions/workflows/ci.yaml)
-[![codecov](https://codecov.io/gh/z-base/cryptosuite/branch/master/graph/badge.svg)](https://codecov.io/gh/z-base/cryptosuite)
-[![license](https://img.shields.io/npm/l/@z-base/cryptosuite)](LICENSE)
-
-# cryptosuite
-
-Developer-experience-first cryptography toolkit that lets you powerfully express cryptographic intentions through a semantic and declarative API surface.
-
-## Compatibility
-
-- Runtimes: Modern JavaScript hosts with WebCrypto.
-- Module format: ESM-only (no CJS build).
-- Required globals / APIs: `crypto`, `crypto.subtle`, `crypto.getRandomValues`.
-- TypeScript: bundled types.
-
-## Goals
-
-- Consistent JWK validation for AES-GCM, HMAC, Ed25519, and RSA-OAEP.
-- Byte-oriented APIs (`Uint8Array` and `ArrayBuffer`) to avoid ambiguous inputs.
-- No side effects on import; all work happens per call.
-- Clean separation between agents (stateful) and clusters (cached).
-- Minimal, but strict WebCrypto wrappers with explicit `CryptosuiteError` codes.
-
-## Installation
-
-```sh
-npm install @z-base/cryptosuite
-# or
-pnpm add @z-base/cryptosuite
-# or
-yarn add @z-base/cryptosuite
-```
-
-## Usage
-
-### Cryptosuite wrapper
-
-```ts
-import { Cryptosuite } from '@z-base/cryptosuite'
-// The `Cryptosuite` convenience class wraps classes and functions into an intuitive structure.
-const cipherJwk = await Cryptosuite.cipher.generateKey()
-const payload = new Uint8Array([1, 2, 3])
-const artifact = await Cryptosuite.cipher.encrypt(cipherJwk, payload)
-const roundtrip = await Cryptosuite.cipher.decrypt(cipherJwk, artifact)
-```
-
-### OpaqueIdentifier
-
-```ts
-import {
-  deriveOID,
-  generateOID,
-  validateOID,
-  type OpaqueIdentifier,
-} from '@z-base/cryptosuite'
-
-const oid = await generateOID() // 43 random base64url chars
-const derived = await deriveOID(idBytesFromSomewhere) // 43 deterministic base64url chars
-const valid = validateOID(uncontrolledOID) // 43 base64url chars | false
-if (!valid) return
-```
-
-### Cipher
-
-```ts
-import { fromJSON, toJSON } from '@z-base/bytecodec'
-import {
-  deriveCipherKey,
-  CipherCluster,
-  CipherAgent,
-  type CipherJWK,
-} from '@z-base/cryptosuite'
-
-const cipherJwk = await deriveCipherKey(deterministicBytes)
-
-const state = { name: 'Bob', email: 'bob@email.com' }
-const enc = await CipherCluster.encrypt(cipherJwk, fromJSON(state)) // {iv, ciphertext}
-const dec = await CipherCluster.decrypt(cipherJwk, enc)
-
-const restored = toJSON(dec)
-console.log(restored.name) // "Bob"
-```
-
-### Exchange
-
-```ts
-import { fromString, toString } from '@z-base/bytecodec'
-import {
-  generateCipherKey,
-  generateExchangePair,
-  ExchangeCluster,
-  WrapAgent,
-  type WrapJWK,
-  UnwrapAgent,
-  type UnwrapJWK,
-  CipherAgent,
-  type CipherJWK,
-} from '@z-base/cryptosuite'
-
-const { wrapJwk, unwrapJwk } = await generateExchangePair()
-const encryptJwk = await generateCipherKey()
-const encryptAgent = new CipherAgent(encryptJwk)
-const body = await encryptAgent.encrypt(fromString('Hello world!')) // {iv, ciphertext}
-const header = await ExchangeCluster.wrap(wrapJwk, encryptJwk) // ArrayBuffer
-const message = { header, body }
-const decryptJwk = (await ExchangeCluster.unwrap(
-  unwrapJwk,
-  message.header
-)) as CipherJWK
-const decryptAgent = new CipherAgent(decryptJwk)
-const decryptedBody = await decryptAgent.decrypt(message.body)
-const messageText = toString(decryptedBody) // "Hello world!"
-```
-
-### HMAC
-
-```ts
-import { fromString } from '@z-base/bytecodec'
-import {
-  generateHMACKey,
-  HMACCluster,
-  HMACAgent,
-  type HMACJWK,
-} from '@z-base/cryptosuite'
-
-const hmacJwk = await generateHMACKey()
-
-const challenge = crypto.getRandomValues(new Uint8Array(32))
-const sig = await HMACCluster.sign(hmacJwk, challenge) // ArrayBuffer
-const ok = await HMACCluster.verify(hmacJwk, challenge, sig) // true | false
-```
-
-### Verification
-
-```ts
-import {
-  generateVerificationPair,
-  VerificationCluster,
-  SignAgent,
-  type SignJWK,
-  VerifyAgent,
-  type VerifyJWK,
-} from '@z-base/cryptosuite'
-
-const { signJwk, verifyJwk } = await generateVerificationPair()
-const payload = new Uint8Array([9, 8, 7])
-const sig = await VerificationCluster.sign(signJwk, payload) // ArrayBuffer
-const ok = await VerificationCluster.verify(verifyJwk, payload, sig) // true | false
-```
-
-## Runtime behavior
-
-### Node
-
-Uses Node's global WebCrypto (`globalThis.crypto`) when available. Node is not the primary target, but tests and benchmarks run on Node 18+.
-
-### Browsers / Edge runtimes
-
-Uses `crypto.subtle` and `crypto.getRandomValues`. Ed25519 and RSA-OAEP support vary by engine; unsupported operations throw `CryptosuiteError` codes.
-
-### Validation & errors
-
-Validation failures throw `CryptosuiteError` with a `code` string (for example `AES_GCM_KEY_EXPECTED`, `RSA_OAEP_UNSUPPORTED`, `ED25519_ALG_INVALID`). Cryptographic failures (e.g., decrypt with the wrong key) bubble the underlying WebCrypto error.
-
-### Security considerations
-
-- Keep `{iv, ciphertext}` together and never mix IVs across messages or keys.
-- Treat all JWKs and raw key bytes as secrets; never log them and rotate on exposure.
-- Always sign a canonical byte serialization so verifiers see identical bytes.
-- Ciphertext length leaks; add padding at your protocol layer if size is sensitive.
-- Handle decrypt/verify failures uniformly; don't leak which check failed.
-
-## Tests
-
-Suite: unit + integration (Node), E2E (Playwright)
-Matrix: Chromium / Firefox / WebKit + mobile emulation (Pixel 5, iPhone 12)
-Coverage: c8 — 100% statements/branches/functions/lines (Node)
-
-## Benchmarks
-
-How it was run: `node benchmark/bench.js`
-Environment: Node v22.14.0 (win32 x64)
-Results:
-
-| Benchmark            | Result                    |
-| -------------------- | ------------------------- |
-| AES-GCM encrypt      | 30.41ms (6575.9 ops/sec)  |
-| HMAC sign+verify     | 29.95ms (6678.1 ops/sec)  |
-| Ed25519 sign+verify  | 76.45ms (2616.0 ops/sec)  |
-| RSA-OAEP wrap+unwrap | 1224.07ms (163.4 ops/sec) |
-
-Results vary by machine.
-
-## License
-
-Apache
-
-3.
-
-[![npm version](https://img.shields.io/npm/v/@z-base/zero-knowledge-credentials)](https://www.npmjs.com/package/@z-base/zero-knowledge-credentials)
-[![CI](https://github.com/z-base/zero-knowledge-credentials/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/z-base/zero-knowledge-credentials/actions/workflows/ci.yaml)
-[![codecov](https://codecov.io/gh/z-base/zero-knowledge-credentials/branch/master/graph/badge.svg)](https://codecov.io/gh/z-base/zero-knowledge-credentials)
-[![license](https://img.shields.io/npm/l/@z-base/zero-knowledge-credentials)](LICENSE)
-
-# zero-knowledge-credentials
-
-Client-side WebAuthn credential discovery for strict zero-knowledge apps. Deterministically derive a routing identifier and cryptographic root keys from a user-verifying authenticator, without accounts, identifiers, or server-side state.
-
-## Compatibility
-
-- Runtimes: modern browsers with WebAuthn + PRF extension + user verification.
-- Module format: ESM-only (no CJS build).
-- Required globals / APIs: `window`, `navigator.credentials`, `PublicKeyCredential`, PRF extension, `crypto.subtle`, `crypto.getRandomValues`.
-- TypeScript: bundled types.
-
-## Goals
-
-- Enable strict local-first zero-knowledge for browsers.
-- Deterministic, runtime-only derivation of an opaque ID and root keys.
-- No storage, no networking, no server-side requirements.
-- Explicit failure modes with stable error codes.
-
-## Installation
-
-```sh
-npm install @z-base/zero-knowledge-credentials
-# or
-pnpm add @z-base/zero-knowledge-credentials
-# or
-yarn add @z-base/zero-knowledge-credentials
-```
-
-## Usage
-
-**These give a general idea and MUST NOT be interpreted as a full solution.**
-
-### Register a credential
-
-```ts
-import {
-  ZKCredentials,
-  type ZKCredential,
-  type ZKCredentialErrorCode,
-} from '@z-base/zero-knowledge-credentials'
-
-await ZKCredentials.registerCredential(
-  'User display name',
-  'platform' // or 'cross-platform'
-)
-```
-
-### Discover a credential
-
-```ts
-import { Bytes } from '@z-base/bytecodec'
-import { Cryptosuite } from '@z-base/cryptosuite'
-import { ZKCredentials } from '@z-base/zero-knowledge-credentials'
-
-const root = await ZKCredentials.discoverCredential()
-
-const id = root.id // routing identifier / OpaqueIdentifier
-const hmacJwk = root.hmacJwk // HMAC root key / HMACJWK
-const cipherJwk = root.cipherJwk // AES-GCM root key / CipherJWK
-
-const cache = await caches.open('opaque-blobs')
-
-let artifact = await cache.match(id) // {iv, ciphertext}
-
-if (!artifact) {
-  const challengeRaw = await fetch(`/api/v1/artifact/${id}/challenge`)
-  const challengeText = await challengeRaw.text()
-  const challengeBytes = Bytes.fromBase64UrlString(challengeText)
-  const signature = await Cryptosuite.hmac.sign(hmacJwk, challengeBytes)
-  const raw = await fetch(`/api/v1/artifact/${id}`, {
-    headers: {
-      Authorization: Bytes.toBase64UrlString(signature),
-    },
-  })
-  artifact = await raw.json() // {iv, ciphertext}
-}
-
-const accountCredentials = await Cryptosuite.cipher.decrypt(cipherJwk, artifact)
-
-// const {id, hmacJwk, cipherJwk} = accountCredentials
-// repeat...
-// const {profileCredentials, workspaceCredentials}  = resourceCredentials
-```
-
-### Generate a credential
-
-```ts
-import { Bytes } from '@z-base/bytecodec'
-import { Cryptosuite } from '@z-base/cryptosuite'
-import { ZKCredentials } from '@z-base/zero-knowledge-credentials'
-
-const profile = {
-  name: 'Bob',
-  preferences: {
-    theme: 'dark',
-  },
-}
-
-const credentials = await ZKCredentials.generateCredential()
-
-const id = credentials.id // resource routing identifier / OpaqueIdentifier
-const hmacJwk = credentials.hmacJwk // HMAC resource key / HMACJWK
-const cipherJwk = credentials.cipherJwk // AES-GCM resource key / CipherJWK
-
-const profileBytes = Bytes.fromJSON(profile)
-const artifact = await Cryptosuite.cipher.encrypt(cipherJwk, profileBytes)
-fetch(
-  `/api/v1/artifact/${id}`,
-  JSON.stringify({
-    verifier: hmacJwk,
-    state: {
-      iv: Bytes.toBase64UrlString(artifact.iv),
-      ciphertext: Bytes.toBase64UrlString(artifact.ciphertext),
-    },
-  }),
-  {
-    method: 'POST',
-  }
-)
-```
-
-## Runtime behavior
-
-### Browsers
-
-Uses WebAuthn PRF outputs to derive:
-
-- `id` (SHA-256 -> base64url of `rawId`)
-- `cipherJwk` (AES-GCM)
-- `hmacJwk` (HMAC-SHA256)
-
-### Validation & errors
-
-All failures are explicit and semantic. Errors are instances of `ZKCredentialError` with a stable `code`:
-
-- `unsupported`
-- `aborted`
-- `user-denied`
-- `no-credential`
-- `prf-unavailable`
-- `key-derivation-failed`
-
-## Tests
-
-Suite: unit + integration (Node), E2E (Playwright)
-Matrix: Chromium / Firefox / WebKit + mobile emulation (Pixel 5, iPhone 12)
-Coverage: c8 — 100% statements/branches/functions/lines (dist via source maps)
-
-## Benchmarks
-
-How it was run: `npm run bench`
-Environment: Node v22.14.0 (win32 x64)
-Results:
-
-| Benchmark          | Result                             |
-| ------------------ | ---------------------------------- |
-| fromPRF            | 5,224 ops/s (0.191 ms/op, 200 ops) |
-| generateCredential | 5,825 ops/s (0.172 ms/op, 50 ops)  |
-
-Results vary by machine.
-
-## License
-
-Apache
+Apache-2.0

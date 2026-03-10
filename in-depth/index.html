@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>nodearchive: In-depth pack() and unpack() guide</title>
+    <meta
+      name="description"
+      content="Reference for nodearchive pack() and unpack(): argument meanings, output formats, return values, dry runs, updates, and extraction rules."
+    />
+    <meta
+      name="keywords"
+      content="nodearchive, in-depth, api guide, pack, unpack, archive, cli, node.js, bun, nar"
+    />
+    <meta name="author" content="nodearchive maintainers" />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <meta name="theme-color" content="#3c873a" />
+    <link
+      rel="canonical"
+      href="https://nodearchive.github.io/nodearchive/in-depth/"
+    />
+    <link rel="icon" href="../nodearchive_favicon.png" sizes="any" />
+    <link rel="apple-touch-icon" href="../nodearchive_logo.png" />
+    <meta
+      property="og:title"
+      content="nodearchive: In-depth pack() and unpack() guide"
+    />
+    <meta
+      property="og:description"
+      content="Reference for nodearchive pack() and unpack(), including argument behavior, output formats, return shapes, dry runs, updates, and extraction rules."
+    />
+    <meta property="og:site_name" content="nodearchive" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content="article" />
+    <meta
+      property="og:url"
+      content="https://nodearchive.github.io/nodearchive/in-depth/"
+    />
+    <meta
+      property="og:image"
+      content="https://nodearchive.github.io/nodearchive/nodearchive_social_sharing_image.png"
+    />
+    <meta
+      property="og:image:alt"
+      content="nodearchive in-depth guide preview"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="nodearchive: In-depth pack() and unpack() guide"
+    />
+    <meta
+      name="twitter:description"
+      content="Reference for nodearchive pack() and unpack(), including argument behavior, output formats, and return shapes."
+    />
+    <meta
+      name="twitter:image"
+      content="https://nodearchive.github.io/nodearchive/nodearchive_social_sharing_image.png"
+    />
+    <meta
+      name="twitter:image:alt"
+      content="nodearchive in-depth guide preview"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "nodearchive: In-depth pack() and unpack() guide",
+        "description": "Reference for nodearchive pack() and unpack(), including argument behavior, output formats, return shapes, dry runs, updates, and extraction rules.",
+        "image": "https://nodearchive.github.io/nodearchive/nodearchive_social_sharing_image.png",
+        "url": "https://nodearchive.github.io/nodearchive/in-depth/",
+        "mainEntityOfPage": "https://nodearchive.github.io/nodearchive/in-depth/",
+        "author": {
+          "@type": "Organization",
+          "name": "nodearchive maintainers",
+          "url": "https://github.com/nodearchive"
+        },
+        "about": {
+          "@type": "SoftwareApplication",
+          "name": "nodearchive",
+          "applicationCategory": "DeveloperApplication",
+          "operatingSystem": "Node.js, Bun",
+          "url": "https://nodearchive.github.io/nodearchive/",
+          "downloadUrl": "https://www.npmjs.com/package/@nodearchive/nodearchive",
+          "codeRepository": "https://github.com/nodearchive/nodearchive"
+        }
+      }
+    </script>
+    <style>
+      :root {
+        --node-green: #3c873a;
+        --node-green-deep: #2f6f2e;
+        --node-green-pale: #e6f4e4;
+        --ink: #253238;
+        --ink-soft: #5c6b72;
+        --surface: #f5f7f6;
+        --paper: #ffffff;
+        --rule: #d7dfdb;
+        --shadow: 0 24px 60px rgba(37, 50, 56, 0.12);
+        --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+        --sans: 'Space Grotesk', 'Segoe UI', sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        scrollbar-color: rgba(60, 135, 58, 0.9) rgba(24, 35, 41, 0.16);
+        scrollbar-width: thin;
+      }
+
+      *::-webkit-scrollbar {
+        height: 0.9rem;
+        width: 0.9rem;
+      }
+
+      *::-webkit-scrollbar-track {
+        background: rgba(24, 35, 41, 0.12);
+        border-radius: 999px;
+      }
+
+      *::-webkit-scrollbar-thumb {
+        background: linear-gradient(
+          180deg,
+          rgba(60, 135, 58, 0.98),
+          rgba(47, 111, 46, 0.98)
+        );
+        border: 3px solid rgba(255, 255, 255, 0.65);
+        border-radius: 999px;
+      }
+
+      html {
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(60, 135, 58, 0.12),
+            transparent 28rem
+          ),
+          linear-gradient(180deg, #fbfcfb 0%, var(--surface) 100%);
+        color: var(--ink);
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: var(--sans);
+        margin: 0;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      code,
+      pre {
+        font-family: var(--mono);
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+      }
+
+      .page-shell {
+        margin: 0 auto;
+        max-width: 78rem;
+        padding: 1.25rem 1.25rem 4rem;
+      }
+
+      .site-header {
+        align-items: center;
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+      }
+
+      .brand {
+        align-items: center;
+        display: inline-flex;
+        gap: 0.9rem;
+        text-decoration: none;
+      }
+
+      .brand img {
+        border-radius: 1rem;
+        box-shadow: 0 14px 28px rgba(37, 50, 56, 0.12);
+        height: 3rem;
+        width: 3rem;
+      }
+
+      .brand-copy strong,
+      .brand-copy span {
+        display: block;
+      }
+
+      .brand-copy strong {
+        font-size: 1rem;
+        letter-spacing: -0.03em;
+      }
+
+      .brand-copy span {
+        color: var(--ink-soft);
+        font-size: 0.9rem;
+      }
+
+      .site-nav {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: flex-end;
+      }
+
+      .site-nav a {
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px solid var(--rule);
+        border-radius: 999px;
+        padding: 0.72rem 0.96rem;
+        text-decoration: none;
+      }
+
+      .page-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 1.25rem;
+      }
+
+      .page-nav a {
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px solid var(--rule);
+        border-radius: 999px;
+        padding: 0.72rem 0.96rem;
+        text-decoration: none;
+      }
+
+      .hero,
+      .method,
+      .callout,
+      .snippet,
+      .arg-card {
+        border: 1px solid var(--rule);
+        border-radius: 1.5rem;
+      }
+
+      .hero {
+        background:
+          linear-gradient(
+            140deg,
+            rgba(255, 255, 255, 0.96),
+            rgba(230, 244, 228, 0.92)
+          ),
+          var(--paper);
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+        padding: 1.5rem;
+      }
+
+      .eyebrow {
+        color: var(--node-green-deep);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        margin: 0 0 0.8rem;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        font-size: clamp(2.2rem, 5vw, 3.8rem);
+        letter-spacing: -0.05em;
+        line-height: 0.95;
+        margin: 0 0 1rem;
+        max-width: 12ch;
+      }
+
+      h2 {
+        font-size: 1.6rem;
+        letter-spacing: -0.04em;
+        margin: 0 0 1rem;
+      }
+
+      h3 {
+        font-size: 1rem;
+        margin: 0 0 0.55rem;
+      }
+
+      p,
+      li {
+        color: var(--ink-soft);
+        line-height: 1.7;
+      }
+
+      main {
+        display: grid;
+        gap: 1.25rem;
+      }
+
+      .hero-grid,
+      .snippet-grid,
+      .args-grid,
+      .callout-grid {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .snippet-grid,
+      .callout-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .args-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .snippet {
+        background: #182329;
+        border-color: rgba(223, 247, 222, 0.14);
+        color: #dff7de;
+        overflow: hidden;
+      }
+
+      .snippet-header {
+        align-items: center;
+        background: transparent;
+        border-bottom: 1px solid rgba(223, 247, 222, 0.12);
+        display: flex;
+        justify-content: space-between;
+        padding: 0.85rem 1rem;
+      }
+
+      .snippet-header span {
+        color: rgba(223, 247, 222, 0.7);
+        font-size: 0.8rem;
+      }
+
+      .snippet pre {
+        background: transparent;
+        color: #dff7de;
+        margin: 0;
+        overflow: auto;
+        padding: 1rem;
+      }
+
+      .method {
+        background: rgba(255, 255, 255, 0.88);
+        padding: 1.35rem;
+      }
+
+      .method section + section {
+        margin-top: 1.25rem;
+      }
+
+      .callout,
+      .arg-card {
+        background: rgba(255, 255, 255, 0.88);
+        padding: 1rem;
+      }
+
+      .arg-card code {
+        color: var(--ink);
+        font-size: 0.95rem;
+        font-weight: 600;
+      }
+
+      .arg-card p {
+        margin: 0;
+      }
+
+      .arg-card p + p {
+        margin-top: 0.55rem;
+      }
+
+      .footer {
+        color: var(--ink-soft);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem 1rem;
+        justify-content: space-between;
+        margin-top: 1.5rem;
+        padding-bottom: 1rem;
+      }
+
+      .footer a {
+        color: var(--node-green-deep);
+      }
+
+      @media (max-width: 960px) {
+        .hero-grid,
+        .snippet-grid,
+        .args-grid,
+        .callout-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .site-header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        h1 {
+          max-width: none;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .page-shell {
+          padding: 0.9rem 0.9rem 3rem;
+        }
+
+        .site-nav {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          width: 100%;
+        }
+
+        .site-nav a {
+          text-align: center;
+          width: 100%;
+        }
+
+        .hero,
+        .method {
+          padding: 1rem;
+        }
+
+        .footer {
+          display: grid;
+          gap: 0.55rem;
+          justify-content: stretch;
+        }
+      }
+    </style>
+  </head>
+  <body itemscope itemtype="https://schema.org/WebPage">
+    <div class="page-shell" itemscope itemtype="https://schema.org/TechArticle">
+      <meta
+        itemprop="headline"
+        content="nodearchive: In-depth pack() and unpack() guide"
+      />
+      <meta
+        itemprop="description"
+        content="Reference for nodearchive pack() and unpack(): argument meanings, output formats, return values, dry runs, updates, and extraction rules."
+      />
+      <link
+        itemprop="url"
+        href="https://nodearchive.github.io/nodearchive/in-depth/"
+      />
+      <link
+        itemprop="image"
+        href="https://nodearchive.github.io/nodearchive/nodearchive_social_sharing_image.png"
+      />
+      <header class="site-header">
+        <a
+          class="brand"
+          href="https://github.com/nodearchive"
+          aria-label="nodearchive GitHub organization"
+          itemprop="author"
+          itemscope
+          itemtype="https://schema.org/Organization"
+        >
+          <meta itemprop="url" content="https://github.com/nodearchive" />
+          <img
+            src="../nodearchive_logo.png"
+            alt="nodearchive logo"
+            itemprop="logo"
+          />
+          <div class="brand-copy">
+            <strong itemprop="name">nodearchive</strong>
+            <span>@nodearchive/nodearchive</span>
+          </div>
+        </a>
+        <nav
+          class="site-nav"
+          aria-label="Primary"
+          itemscope
+          itemtype="https://schema.org/SiteNavigationElement"
+        >
+          <a href="/" itemprop="url"><span itemprop="name">Home</span></a>
+          <a href="/#install" itemprop="url"
+            ><span itemprop="name">Install</span></a
+          >
+          <a href="/#cli" itemprop="url"><span itemprop="name">CLI</span></a>
+          <a href="/#api" itemprop="url"><span itemprop="name">API</span></a>
+          <a href="/in-depth/" itemprop="url"
+            ><span itemprop="name">In-Depth</span></a
+          >
+          <a href="/coverage" itemprop="url"
+            ><span itemprop="name">Coverage</span></a
+          >
+        </nav>
+      </header>
+
+      <section class="hero" id="top">
+        <div class="hero-grid">
+          <div>
+            <p class="eyebrow">Argument reference</p>
+            <h1 itemprop="name">
+              What each argument means, and what it changes.
+            </h1>
+            <p itemprop="abstract">
+              This page is the practical reference for `pack()` and `unpack()`.
+              It explains how each argument affects source selection, write
+              behavior, return values, dry runs, updates, and extraction safety.
+            </p>
+            <nav class="page-nav" aria-label="In-depth sections">
+              <a href="#pack">pack()</a>
+              <a href="#unpack">unpack()</a>
+            </nav>
+          </div>
+        </div>
+      </section>
+
+      <main itemprop="articleBody">
+        <section class="method" id="pack">
+          <h2>pack()</h2>
+          <p>
+            `pack()` creates archive output from in-memory data, glob-expanded
+            paths, or exact filesystem paths. Native `.nar` is the default, and
+            you can also target `.zip`, `.tar`, `.tgz`, `.tar.gz`, or `.gz`
+            output when that fits the workflow better.
+          </p>
+
+          <section>
+            <h3>What it returns</h3>
+            <div class="callout-grid">
+              <article class="callout">
+                <p>
+                  Without `destinationPath`, `pack()` returns archive bytes as a
+                  `Uint8Array`.
+                </p>
+              </article>
+              <article class="callout">
+                <p>
+                  With `destinationPath`, `pack()` writes to disk and returns
+                  `undefined` unless `passThru` is enabled, in which case it
+                  returns an `ArchiveSummary`. The final output format comes
+                  from `outFormat` or from the destination extension when it is
+                  recognized.
+                </p>
+              </article>
+            </div>
+          </section>
+
+          <section>
+            <h3>Arguments</h3>
+            <div class="args-grid">
+              <article class="arg-card">
+                <h3><code>blob</code></h3>
+                <p>Meaning: an in-memory source.</p>
+                <p>
+                  Effect: packs a string, `Blob`, typed array, `ArrayBuffer`,
+                  `SharedArrayBuffer`, or other byte-like input directly into a
+                  single-file archive.
+                </p>
+                <p>
+                  CLI: no direct flag. The terminal interface is file-oriented,
+                  so use the package API when the source only exists in memory.
+                </p>
+              </article>
+              <article class="arg-card">
+                <h3><code>path</code></h3>
+                <p>Meaning: one glob or an array of globs.</p>
+                <p>
+                  Effect: expands through `fast-glob`, so patterns such as
+                  `src/**/*.ts` are resolved before the archive is built.
+                </p>
+                <p>
+                  CLI: <code>--path</code> or <code>-p</code>. The first source
+                  path can also be passed positionally.
+                </p>
+              </article>
+              <article class="arg-card">
+                <h3><code>literalPath</code></h3>
+                <p>Meaning: one exact path or an array of exact paths.</p>
+                <p>
+                  Effect: bypasses glob semantics. Use it when you want the path
+                  names you pass to be treated literally.
+                </p>
+                <p>
+                  CLI: <code>--literalPath</code> or <code>-l</code>. Repeat the
+                  flag for multiple exact inputs.
+                </p>
+              </article>
+              <article class="arg-card">
+                <h3><code>destinationPath</code></h3>
+                <p>Meaning: where the archive file should be written.</p>
+                <p>
+                  Effect: switches `pack()` from memory mode into filesystem
+                  mode. Combined with `whatIf`, it plans the write without
+                  creating the archive file. The extension can also infer the
+                  output format for `.zip`, `.tar`, `.tgz`, `.tar.gz`, and
+                  `.gz`.
+                </p>
+                <p>
+                  CLI: <code>--destinationPath</code> or <code>-d</code>. It is
+                  also accepted as the second positional argument.
+                </p>
+              </article>
+              <article class="arg-card">
+                <h3><code>outFormat</code></h3>
+                <p>Meaning: the archive format to emit.</p>
+                <p>
+                  Effect: overrides the default `.nar` output and selects `zip`,
+                  `tar`, `tgz`, `tar.gz`, or `gz`. When both `destinationPath`
+                  and `outFormat` are provided, they must agree on the format
+                  family.
+                </p>
+                <p>CLI: <code>--outFormat</code> or <code>-o</code>.</p>
+              </article>
+              <article class="arg-card">
+                <h3><code>compressionLevel</code></h3>
+                <p>Meaning: gzip policy for the resulting archive.</p>
+                <p>
+                  Effect: accepts `Optimal`, `Fastest`, or `NoCompression`.
+                  Higher compression usually trades more CPU for fewer bytes. It
+                  applies to `.nar`, `.zip`, `.gz`, `.tgz`, and `.tar.gz`
+                  output.
+                </p>
+                <p>CLI: <code>--compressionLevel</code> or <code>-c</code>.</p>
+              </article>
+              <article class="arg-card">
+                <h3><code>update</code></h3>
+                <p>Meaning: merge into an existing `.nar`.</p>
+                <p>
+                  Effect: reads the current archive at `destinationPath`, keeps
+                  entries that are not being replaced, and overwrites entries
+                  whose paths are present in the new input set. This is limited
+                  to native `.nar` output.
+                </p>
+                <p>CLI: <code>--update</code> or <code>-u</code>.</p>
+              </article>
+              <article class="arg-card">
+                <h3><code>force</code></h3>
+                <p>Meaning: allow overwriting the destination file.</p>
+                <p>
+                  Effect: lets `pack()` replace an existing archive instead of
+                  failing with `ARCHIVE_DESTINATION_EXISTS`.
+                </p>
+                <p>CLI: <code>--force</code> or <code>-f</code>.</p>
+              </article>
+              <article class="arg-card">
+                <h3><code>passThru</code></h3>
+                <p>Meaning: request a summary object.</p>
+                <p>
+                  Effect: returns an `ArchiveSummary` describing entry count,
+                  output mode, bytes, destination, and dry-run status.
+                </p>
+                <p>CLI: <code>--passThru</code> or <code>-t</code>.</p>
+              </article>
+              <article class="arg-card">
+                <h3><code>whatIf</code></h3>
+                <p>Meaning: dry-run mode.</p>
+                <p>
+                  Effect: computes the archive and summary without writing the
+                  archive file to disk.
+                </p>
+                <p>CLI: <code>--whatIf</code> or <code>-w</code>.</p>
+              </article>
+              <article class="arg-card">
+                <h3><code>confirm</code></h3>
+                <p>Meaning: reserved switch.</p>
+                <p>
+                  Effect: currently unsupported. Passing it throws
+                  `ARCHIVE_CONFIRM_UNSUPPORTED`.
+                </p>
+                <p>CLI: <code>--confirm</code> or <code>-y</code>.</p>
+              </article>
+            </div>
+          </section>
+
+          <section>
+            <h3>Practical examples</h3>
+            <div class="snippet-grid">
+              <article class="snippet">
+                <div class="snippet-header">
+                  <strong>Filesystem output</strong>
+                  <span>pack()</span>
+                </div>
+                <pre><code>await pack({
+  literalPath: ['src', 'package.json'],
+  destinationPath: './dist/app.nar',
+  force: true,
+})</code></pre>
+              </article>
+              <article class="snippet">
+                <div class="snippet-header">
+                  <strong>In-memory output</strong>
+                  <span>pack()</span>
+                </div>
+                <pre><code>const archive = await pack({
+  blob: 'hello world',
+})</code></pre>
+              </article>
+              <article class="snippet">
+                <div class="snippet-header">
+                  <strong>Alternative output formats</strong>
+                  <span>pack()</span>
+                </div>
+                <pre><code>await pack({
+  literalPath: ['src'],
+  destinationPath: './dist/app.zip',
+  outFormat: 'zip',
+})
+
+await pack({
+  literalPath: ['src'],
+  destinationPath: './dist/app.tgz',
+})</code></pre>
+              </article>
+              <article class="snippet">
+                <div class="snippet-header">
+                  <strong>Terminal, long flags</strong>
+                  <span>nar pack</span>
+                </div>
+                <pre><code>nar pack --path ./src --destinationPath ./dist/app.nar --force --passThru
+nar pack --path ./src --destinationPath ./dist/app.zip --outFormat zip
+nar pack --literalPath ./package.json --destinationPath ./dist/meta.nar
+nar pack --path ./src --path ./README.md -d ./dist/bundle.nar -c Fastest</code></pre>
+              </article>
+              <article class="snippet">
+                <div class="snippet-header">
+                  <strong>Terminal, short flags</strong>
+                  <span>nar pack</span>
+                </div>
+                <pre><code>nar pack -p ./src -d ./dist/app.nar -f -t
+nar pack -p ./src -d ./dist/app.zip -o zip
+nar pack -l ./package.json -d ./dist/meta.nar
+nar pack ./src ./dist/app.nar -u -w</code></pre>
+              </article>
+            </div>
+          </section>
+        </section>
+
+        <section class="method" id="unpack">
+          <h2>unpack()</h2>
+          <p>
+            `unpack()` reads archive data and either returns it in memory or
+            writes the extracted files to disk. It reads native `.nar` payloads
+            and also incoming `.zip`, `.tar`, `.tgz`, `.tar.gz`, and `.gz`
+            archives.
+          </p>
+
+          <section>
+            <h3>What it returns</h3>
+            <div class="callout-grid">
+              <article class="callout">
+                <p>
+                  Without `destinationPath`, `unpack()` returns a `Uint8Array`
+                  when the archive contains a single file, or an
+                  `UnpackedArchive` object when multiple entries are present.
+                </p>
+              </article>
+              <article class="callout">
+                <p>
+                  With `destinationPath`, `unpack()` writes files to disk and
+                  returns `undefined` unless `passThru` is enabled, in which
+                  case it returns an `ArchiveSummary`.
+                </p>
+              </article>
+            </div>
+          </section>
+
+          <section>
+            <h3>Arguments</h3>
+            <div class="args-grid">
+              <article class="arg-card">
+                <h3><code>blob</code></h3>
+                <p>Meaning: an in-memory archive source.</p>
+                <p>
+                  Effect: unpacks bytes already held by your code without
+                  touching the filesystem for the read step.
+                </p>
+                <p>
+                  CLI: no direct flag. Use the package API when the archive is
+                  already in memory.
+                </p>
+              </article>
+              <article class="arg-card">
+                <h3><code>path</code></h3>
+                <p>Meaning: a source archive path.</p>
+                <p>
+                  Effect: reads the archive from disk with standard path
+                  semantics. For `unpack()`, this is a single string, not a glob
+                  array.
+                </p>
+                <p>
+                  CLI: <code>--path</code> or <code>-p</code>. The source
+                  archive can also be passed as the first positional argument.
+                </p>
+              </article>
+              <article class="arg-card">
+                <h3><code>literalPath</code></h3>
+                <p>Meaning: an explicit source archive path.</p>
+                <p>
+                  Effect: mirrors the `path` slot but lets the caller stay
+                  consistent with code that already uses `literalPath` naming.
+                </p>
+                <p>CLI: <code>--literalPath</code> or <code>-l</code>.</p>
+              </article>
+              <article class="arg-card">
+                <h3><code>destinationPath</code></h3>
+                <p>Meaning: extraction target directory.</p>
+                <p>
+                  Effect: switches from returning memory results to writing the
+                  extracted directory tree on disk.
+                </p>
+                <p>
+                  CLI: <code>--destinationPath</code> or <code>-d</code>. It is
+                  also accepted as the second positional argument.
+                </p>
+              </article>
+              <article class="arg-card">
+                <h3><code>force</code></h3>
+                <p>Meaning: allow overwriting extracted files.</p>
+                <p>
+                  Effect: replaces existing files in the destination tree rather
+                  than failing when a target path already exists.
+                </p>
+                <p>CLI: <code>--force</code> or <code>-f</code>.</p>
+              </article>
+              <article class="arg-card">
+                <h3><code>passThru</code></h3>
+                <p>Meaning: request an extraction summary.</p>
+                <p>
+                  Effect: returns `ArchiveSummary` instead of `undefined` when
+                  writing to disk.
+                </p>
+                <p>CLI: <code>--passThru</code> or <code>-t</code>.</p>
+              </article>
+              <article class="arg-card">
+                <h3><code>whatIf</code></h3>
+                <p>Meaning: dry-run mode.</p>
+                <p>
+                  Effect: validates and plans the extraction without writing any
+                  files. Useful for previews and CI checks.
+                </p>
+                <p>CLI: <code>--whatIf</code> or <code>-w</code>.</p>
+              </article>
+              <article class="arg-card">
+                <h3><code>confirm</code></h3>
+                <p>Meaning: reserved switch.</p>
+                <p>
+                  Effect: currently unsupported. Passing it throws
+                  `ARCHIVE_CONFIRM_UNSUPPORTED`.
+                </p>
+                <p>CLI: <code>--confirm</code> or <code>-y</code>.</p>
+              </article>
+            </div>
+          </section>
+
+          <section>
+            <h3>Practical examples</h3>
+            <div class="snippet-grid">
+              <article class="snippet">
+                <div class="snippet-header">
+                  <strong>Extract a nodearchive payload</strong>
+                  <span>unpack()</span>
+                </div>
+                <pre><code>await unpack({
+  path: './dist/app.nar',
+  destinationPath: './out',
+  force: true,
+})</code></pre>
+              </article>
+              <article class="snippet">
+                <div class="snippet-header">
+                  <strong>Extract an incoming zip or tarball</strong>
+                  <span>unpack()</span>
+                </div>
+                <pre><code>await unpack({
+  path: './vendor/release.zip',
+  destinationPath: './vendor/release',
+  force: true,
+})</code></pre>
+              </article>
+              <article class="snippet">
+                <div class="snippet-header">
+                  <strong>Terminal, long flags</strong>
+                  <span>nar unpack</span>
+                </div>
+                <pre><code>nar unpack --path ./dist/app.nar --destinationPath ./out --force --passThru
+nar unpack --literalPath ./vendor/release.zip --destinationPath ./vendor/release
+nar unpack --path ./incoming.tar.gz --destinationPath ./preview --whatIf</code></pre>
+              </article>
+              <article class="snippet">
+                <div class="snippet-header">
+                  <strong>Terminal, short flags</strong>
+                  <span>nar unpack</span>
+                </div>
+                <pre><code>nar unpack -p ./dist/app.nar -d ./out -f -t
+nar unpack -l ./vendor/release.zip -d ./vendor/release
+nar unpack ./incoming.tar.gz ./preview -w</code></pre>
+              </article>
+            </div>
+          </section>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span>Apache-2.0</span>
+        <span>
+          npm:
+          <a href="https://www.npmjs.com/package/@nodearchive/nodearchive"
+            >@nodearchive/nodearchive</a
+          >
+        </span>
+        <span>
+          repo:
+          <a href="https://github.com/nodearchive/nodearchive"
+            >nodearchive/nodearchive</a
+          >
+        </span>
+        <span><a href="/in-depth/">in-depth guide</a></span>
+        <span><a href="/coverage">coverage</a></span>
+      </footer>
+    </div>
+  </body>
+</html>

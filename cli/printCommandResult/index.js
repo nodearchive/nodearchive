@@ -11,5 +11,5 @@ export function printCommandResult(result) {
     return
   }
 
-  console.log(result)
+  process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
 }

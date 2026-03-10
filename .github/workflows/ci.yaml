@@ -10,7 +10,8 @@ env:
   HUSKY: 0
 
 jobs:
-  test:
+  test-node:
+    name: Node ${{ matrix.node-version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -28,26 +29,83 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-
-      - name: Run tests
-        run: npm test
+      - name: Run coverage suite
+        run: npm run test:coverage
 
       - name: Upload coverage reports to Codecov
+        if: matrix.node-version == '22.x'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage/lcov.info
           fail_ci_if_error: true
 
-      - name: Enforce formatting
+  test-bun:
+    name: Bun
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build package
+        run: bun run build
+
+      - name: Run Bun smoke test
         run: |
-          npm run format
+          bun --eval "import { pack, unpack } from './dist/index.js';
+          const archive = await pack({ blob: 'bun-smoke' });
+          const restored = await unpack({ blob: archive });
+          const text = new TextDecoder().decode(restored);
+          if (text !== 'bun-smoke') throw new Error(text);"
+
+  test-e2e:
+    name: Playwright
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Build package
+        run: npm run build
+
+      - name: Run Playwright suite
+        run: npm run test:e2e
+
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check formatting
+        run: npx prettier . --check
 
   release-please:
     if: github.event_name == 'push'
-    needs: test
+    needs: [test-node, test-bun, test-e2e, format]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -59,7 +117,7 @@ jobs:
         uses: googleapis/release-please-action@v3
         with:
           release-type: node
-          package-name: "@z-base/package-name"
+          package-name: '@nodearchive/nodearchive'
 
   publish:
     if: needs.release-please.outputs.release_created == 'true'
@@ -73,11 +131,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: '24'
           registry-url: https://registry.npmjs.org
           cache: npm
 
       - run: npm ci
-      - run: npm run build --if-present
+      - run: npm run build
 
       - run: npm publish --access public --ignore-scripts

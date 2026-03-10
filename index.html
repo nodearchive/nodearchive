@@ -1,21 +1,847 @@
 <!doctype html>
 <html lang="en">
   <head>
-    add opengraph twitter graph basic seo and rich result jsonled etc. favicons
-    and everything also this is the same as npm @nodearchive/nodearchive and git
-    hub nodearchive/nodearchive, yeah you know
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>
-      nodearchive | Archiver for your JavaScript project or from your terminal
-    </title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>nodearchive: Pack and unpack nar, zip, tar, and gzip archives</title>
+    <meta
+      name="description"
+      content="Pack and unpack nar, zip, tar, tgz, tar.gz, and gz archives from one ESM API and the nar CLI for Node.js and Bun."
+    />
+    <meta
+      name="keywords"
+      content="nodearchive, nar, archive, cli, node.js, bun, zip, tar, tgz, tar.gz, gzip"
+    />
+    <meta name="author" content="nodearchive maintainers" />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <meta name="theme-color" content="#3c873a" />
+    <link rel="canonical" href="https://nodearchive.github.io/nodearchive/" />
+    <link rel="icon" href="./nodearchive_favicon.png" sizes="any" />
+    <link rel="apple-touch-icon" href="./nodearchive_logo.png" />
+    <meta
+      property="og:title"
+      content="nodearchive: Pack and unpack nar, zip, tar, and gzip archives"
+    />
+    <meta
+      property="og:description"
+      content="Pack and unpack nar, zip, tar, tgz, tar.gz, and gz archives with one small API and the nar CLI."
+    />
+    <meta property="og:site_name" content="nodearchive" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://nodearchive.github.io/nodearchive/"
+    />
+    <meta
+      property="og:image"
+      content="https://nodearchive.github.io/nodearchive/nodearchive_social_sharing_image.png"
+    />
+    <meta
+      property="og:image:alt"
+      content="nodearchive package and CLI preview"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="nodearchive: Pack and unpack nar, zip, tar, and gzip archives"
+    />
+    <meta
+      name="twitter:description"
+      content="Pack and unpack nar, zip, tar, tgz, tar.gz, and gz archives from one API and the nar CLI."
+    />
+    <meta
+      name="twitter:image"
+      content="https://nodearchive.github.io/nodearchive/nodearchive_social_sharing_image.png"
+    />
+    <meta
+      name="twitter:image:alt"
+      content="nodearchive package and CLI preview"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "nodearchive",
+        "applicationCategory": "DeveloperApplication",
+        "description": "Pack and unpack nar, zip, tar, tgz, tar.gz, and gz archives from one ESM API and the nar CLI for Node.js and Bun.",
+        "downloadUrl": "https://www.npmjs.com/package/@nodearchive/nodearchive",
+        "image": "https://nodearchive.github.io/nodearchive/nodearchive_social_sharing_image.png",
+        "codeRepository": "https://github.com/nodearchive/nodearchive",
+        "operatingSystem": "Node.js, Bun",
+        "softwareVersion": "0.0.0",
+        "url": "https://nodearchive.github.io/nodearchive/"
+      }
+    </script>
+    <style>
+      :root {
+        --node-green: #3c873a;
+        --node-green-deep: #2f6f2e;
+        --node-green-pale: #e6f4e4;
+        --ink: #253238;
+        --ink-soft: #5c6b72;
+        --surface: #f5f7f6;
+        --paper: #ffffff;
+        --rule: #d7dfdb;
+        --shadow: 0 24px 60px rgba(37, 50, 56, 0.12);
+        --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+        --sans: 'Space Grotesk', 'Segoe UI', sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        scrollbar-color: rgba(60, 135, 58, 0.9) rgba(24, 35, 41, 0.16);
+        scrollbar-width: thin;
+      }
+
+      *::-webkit-scrollbar {
+        height: 0.9rem;
+        width: 0.9rem;
+      }
+
+      *::-webkit-scrollbar-track {
+        background: rgba(24, 35, 41, 0.12);
+        border-radius: 999px;
+      }
+
+      *::-webkit-scrollbar-thumb {
+        background: linear-gradient(
+          180deg,
+          rgba(60, 135, 58, 0.98),
+          rgba(47, 111, 46, 0.98)
+        );
+        border: 3px solid rgba(255, 255, 255, 0.65);
+        border-radius: 999px;
+      }
+
+      html {
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(60, 135, 58, 0.12),
+            transparent 28rem
+          ),
+          linear-gradient(180deg, #fbfcfb 0%, var(--surface) 100%);
+        color: var(--ink);
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: var(--sans);
+        margin: 0;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+      }
+
+      code,
+      pre {
+        font-family: var(--mono);
+      }
+
+      .page-shell {
+        margin: 0 auto;
+        max-width: 78rem;
+        padding: 1.25rem 1.25rem 4rem;
+      }
+
+      .site-header {
+        align-items: center;
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+      }
+
+      .brand {
+        align-items: center;
+        display: inline-flex;
+        gap: 0.9rem;
+        text-decoration: none;
+      }
+
+      .brand img {
+        border-radius: 1rem;
+        box-shadow: 0 14px 28px rgba(37, 50, 56, 0.12);
+        height: 3rem;
+        width: 3rem;
+      }
+
+      .brand-copy strong,
+      .brand-copy span {
+        display: block;
+      }
+
+      .brand-copy strong {
+        font-size: 1rem;
+        letter-spacing: -0.03em;
+      }
+
+      .brand-copy span {
+        color: var(--ink-soft);
+        font-size: 0.9rem;
+      }
+
+      .site-nav {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: flex-end;
+      }
+
+      .site-nav a {
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px solid var(--rule);
+        border-radius: 999px;
+        padding: 0.72rem 0.96rem;
+        text-decoration: none;
+      }
+
+      .hero {
+        background:
+          linear-gradient(
+            140deg,
+            rgba(255, 255, 255, 0.96),
+            rgba(230, 244, 228, 0.92)
+          ),
+          var(--paper);
+        border: 1px solid rgba(60, 135, 58, 0.16);
+        border-radius: 1.8rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        padding: 1.5rem;
+      }
+
+      .hero-grid {
+        align-items: center;
+        display: grid;
+        gap: 2rem;
+        grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.92fr);
+      }
+
+      .eyebrow {
+        color: var(--node-green-deep);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        margin: 0 0 0.8rem;
+        text-transform: uppercase;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.4rem, 4.3vw, 3.95rem);
+        letter-spacing: -0.06em;
+        line-height: 0.94;
+        margin: 0 0 1rem;
+        max-width: 14ch;
+      }
+
+      .hero p {
+        color: var(--ink-soft);
+        font-size: 1.02rem;
+        line-height: 1.7;
+        margin: 0;
+        max-width: 38rem;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+      }
+
+      .hero-actions a {
+        border-radius: 999px;
+        font-weight: 600;
+        padding: 0.9rem 1.15rem;
+        text-decoration: none;
+      }
+
+      .hero-actions a.primary {
+        background: var(--ink);
+        color: white;
+      }
+
+      .hero-actions a.secondary {
+        background: var(--node-green-pale);
+        color: var(--node-green-deep);
+      }
+
+      .command-panel {
+        background: #182329;
+        border-radius: 1.4rem;
+        color: #dff7de;
+        display: flex;
+        flex-direction: column;
+        gap: 0.95rem;
+        min-width: 0;
+        padding: 1.1rem;
+      }
+
+      .panel-label {
+        color: rgba(223, 247, 222, 0.76);
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .command-block {
+        display: grid;
+        gap: 0.55rem;
+      }
+
+      .command-block + .command-block {
+        border-top: 1px solid rgba(223, 247, 222, 0.12);
+        padding-top: 0.95rem;
+      }
+
+      .command-panel pre,
+      .snippet pre {
+        margin: 0;
+        overflow: auto;
+      }
+
+      .command-panel pre {
+        font-size: 0.96rem;
+        line-height: 1.52;
+        overflow: hidden;
+        white-space: pre-wrap;
+      }
+
+      .section-grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        margin-bottom: 1.5rem;
+      }
+
+      .card,
+      .snippet {
+        border: 1px solid var(--rule);
+        border-radius: 1.35rem;
+      }
+
+      .card {
+        background: rgba(255, 255, 255, 0.88);
+        padding: 1.1rem;
+      }
+
+      .card strong,
+      .card span {
+        display: block;
+      }
+
+      .card strong {
+        font-size: 1rem;
+        margin-bottom: 0.45rem;
+      }
+
+      .card span {
+        color: var(--ink-soft);
+        line-height: 1.6;
+      }
+
+      main {
+        display: grid;
+        gap: 1.25rem;
+      }
+
+      section.block {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid var(--rule);
+        border-radius: 1.5rem;
+        padding: 1.35rem;
+      }
+
+      section.block h2 {
+        font-size: 1.45rem;
+        letter-spacing: -0.04em;
+        margin: 0 0 0.9rem;
+      }
+
+      .lede {
+        color: var(--ink-soft);
+        line-height: 1.7;
+        margin: 0 0 1.1rem;
+        max-width: 58rem;
+      }
+
+      .install-grid,
+      .snippet-grid,
+      .runtime-grid {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .install-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .snippet-grid,
+      .runtime-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .api-snippet-grid .snippet:last-child {
+        grid-column: 1 / -1;
+      }
+
+      .snippet {
+        background: #182329;
+        border-color: rgba(223, 247, 222, 0.14);
+        color: #dff7de;
+        overflow: hidden;
+      }
+
+      .snippet-header {
+        align-items: center;
+        background: transparent;
+        border-bottom: 1px solid rgba(223, 247, 222, 0.12);
+        display: flex;
+        justify-content: space-between;
+        padding: 0.85rem 1rem;
+      }
+
+      .snippet-header strong {
+        font-size: 0.98rem;
+      }
+
+      .snippet-header span {
+        color: rgba(223, 247, 222, 0.7);
+        font-size: 0.8rem;
+      }
+
+      .snippet pre {
+        background: transparent;
+        color: #dff7de;
+        padding: 1rem;
+      }
+
+      .runtime-grid .card {
+        background: white;
+      }
+
+      .footer {
+        color: var(--ink-soft);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem 1rem;
+        justify-content: space-between;
+        margin-top: 1.5rem;
+        padding-bottom: 1rem;
+      }
+
+      .footer a {
+        color: var(--node-green-deep);
+      }
+
+      @media (max-width: 1180px) {
+        .section-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 960px) {
+        .hero-grid,
+        .install-grid,
+        .snippet-grid,
+        .runtime-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .section-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .site-header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .hero h1 {
+          max-width: none;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .page-shell {
+          padding: 0.9rem 0.9rem 3rem;
+        }
+
+        .site-nav {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          justify-content: stretch;
+          width: 100%;
+        }
+
+        .site-nav a {
+          text-align: center;
+          width: 100%;
+        }
+
+        .hero,
+        section.block,
+        .command-panel {
+          padding: 1rem;
+        }
+
+        .section-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .footer {
+          display: grid;
+          gap: 0.55rem;
+          justify-content: stretch;
+        }
+      }
+    </style>
   </head>
-  <body>
-    use styling from the images, make it developer centric display the command
-    and usage examples etc. make it nice you can use cdn deliver or something
-    for libarys use the style from the images, so the colors, basically
-    background is white and content is node.js grey and green but yeha this
-    pacakge is for typescript, js, bun and node tools, npx bunx, or global cli,
-    etc. etc. make it minimal nice stuff
+  <body itemscope itemtype="https://schema.org/WebPage">
+    <div
+      class="page-shell"
+      itemscope
+      itemtype="https://schema.org/SoftwareApplication"
+    >
+      <meta itemprop="name" content="nodearchive" />
+      <meta
+        itemprop="description"
+        content="Pack and unpack nar, zip, tar, tgz, tar.gz, and gz archives from one ESM API and the nar CLI for Node.js and Bun."
+      />
+      <meta itemprop="applicationCategory" content="DeveloperApplication" />
+      <meta itemprop="operatingSystem" content="Node.js, Bun" />
+      <meta itemprop="softwareVersion" content="0.0.0" />
+      <link itemprop="url" href="https://nodearchive.github.io/nodearchive/" />
+      <link
+        itemprop="downloadUrl"
+        href="https://www.npmjs.com/package/@nodearchive/nodearchive"
+      />
+      <link
+        itemprop="codeRepository"
+        href="https://github.com/nodearchive/nodearchive"
+      />
+      <link
+        itemprop="image"
+        href="https://nodearchive.github.io/nodearchive/nodearchive_social_sharing_image.png"
+      />
+      <header class="site-header">
+        <a
+          class="brand"
+          href="https://github.com/nodearchive"
+          aria-label="nodearchive GitHub organization"
+          itemprop="publisher"
+          itemscope
+          itemtype="https://schema.org/Organization"
+        >
+          <meta itemprop="url" content="https://github.com/nodearchive" />
+          <img
+            src="./nodearchive_logo.png"
+            alt="nodearchive logo"
+            itemprop="logo"
+          />
+          <div class="brand-copy">
+            <strong itemprop="name">nodearchive</strong>
+            <span>@nodearchive/nodearchive</span>
+          </div>
+        </a>
+        <nav
+          class="site-nav"
+          aria-label="Primary"
+          itemscope
+          itemtype="https://schema.org/SiteNavigationElement"
+        >
+          <a href="/" itemprop="url"><span itemprop="name">Home</span></a>
+          <a href="/#install" itemprop="url"
+            ><span itemprop="name">Install</span></a
+          >
+          <a href="/#cli" itemprop="url"><span itemprop="name">CLI</span></a>
+          <a href="/#api" itemprop="url"><span itemprop="name">API</span></a>
+          <a href="/in-depth/" itemprop="url"
+            ><span itemprop="name">In-Depth</span></a
+          >
+          <a href="/coverage" itemprop="url"
+            ><span itemprop="name">Coverage</span></a
+          >
+        </nav>
+      </header>
+
+      <section class="hero" id="top" itemprop="mainContentOfPage">
+        <div class="hero-grid">
+          <div>
+            <p class="eyebrow">Pack and unpack `.nar` and common archives.</p>
+            <h1 itemprop="headline">
+              One archive tool for Node.js, Bun, TypeScript, and the terminal.
+            </h1>
+            <p itemprop="abstract">
+              Create `.nar`, `.zip`, `.tar`, `.tgz`, `.tar.gz`, or `.gz` output
+              from files, directories, or bytes already in memory. Read the same
+              formats through the same API and `nar` CLI without bolting
+              together one-format tools.
+            </p>
+            <div class="hero-actions">
+              <a
+                class="primary"
+                href="https://www.npmjs.com/package/@nodearchive/nodearchive"
+                >View npm package</a
+              >
+              <a
+                class="secondary"
+                href="https://github.com/nodearchive/nodearchive"
+                >View GitHub repository</a
+              >
+              <a class="secondary" href="/in-depth/">Open in-depth guide</a>
+            </div>
+          </div>
+          <aside class="command-panel" aria-label="Quick start commands">
+            <section class="command-block">
+              <span class="panel-label">CLI</span>
+              <pre><code>npm i -g @nodearchive/nodearchive
+nar --help
+
+nar pack ./src ./app.nar
+nar unpack ./incoming.zip ./vendor</code></pre>
+            </section>
+            <section class="command-block">
+              <span class="panel-label">Code</span>
+              <pre><code>import { pack, unpack } from '@nodearchive/nodearchive'
+
+await pack({ literalPath: ['src'], destinationPath: './app.nar' })
+await unpack({ path: './incoming.zip', destinationPath: './vendor' })</code></pre>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section-grid" aria-label="Highlights">
+        <article class="card">
+          <strong>Write native and interchange archives</strong>
+          <span>
+            Pack directories, files, or in-memory bytes into `.nar`, `.zip`,
+            `.tar`, `.tgz`, `.tar.gz`, or `.gz`.
+          </span>
+        </article>
+        <article class="card">
+          <strong>Read incoming formats</strong>
+          <span>
+            Unpack `.nar`, `.zip`, `.tar`, `.tgz`, `.tar.gz`, and `.gz` through
+            the same entry point.
+          </span>
+        </article>
+        <article class="card">
+          <strong>One surface</strong>
+          <span>
+            `pack()` and `unpack()` stay aligned across application code and the
+            `nar` CLI.
+          </span>
+        </article>
+        <article class="card">
+          <strong>Filesystem or memory</strong>
+          <span>
+            Write to disk when you need files, or keep the result in bytes when
+            a pipeline only needs memory output.
+          </span>
+        </article>
+        <article class="card">
+          <strong>Explicit failures</strong>
+          <span>
+            Invalid inputs and unsafe paths fail with stable `NodearchiveError`
+            codes.
+          </span>
+        </article>
+      </section>
+
+      <main itemprop="mainEntity">
+        <section class="block" id="install">
+          <h2>Install</h2>
+          <p class="lede">
+            Install the package for application code, or add `nar` globally when
+            you want the command available in any shell.
+          </p>
+          <div class="install-grid">
+            <article class="snippet">
+              <div class="snippet-header">
+                <strong>Add to a project</strong>
+                <span>package.json</span>
+              </div>
+              <pre><code>npm install @nodearchive/nodearchive
+pnpm add @nodearchive/nodearchive
+yarn add @nodearchive/nodearchive
+bun add @nodearchive/nodearchive</code></pre>
+            </article>
+            <article class="snippet">
+              <div class="snippet-header">
+                <strong>Global CLI</strong>
+                <span>shell</span>
+              </div>
+              <pre><code>npm i -g @nodearchive/nodearchive
+bun add --global @nodearchive/nodearchive</code></pre>
+            </article>
+          </div>
+        </section>
+
+        <section class="block" id="cli">
+          <h2>CLI</h2>
+          <p class="lede">
+            Keep the command surface small: `pack` to write archives, `unpack`
+            to extract them, and `--help` when you need the flags.
+          </p>
+          <div class="snippet-grid">
+            <article class="snippet">
+              <div class="snippet-header">
+                <strong>Create archives</strong>
+                <span>nar pack</span>
+              </div>
+              <pre><code>nar pack ./src ./dist/app.nar --passThru
+nar pack ./src ./dist/app.zip --outFormat zip --passThru
+nar pack ./package.json ./dist/meta.nar --force
+nar pack ./src ./dist/app.nar --update --passThru</code></pre>
+            </article>
+            <article class="snippet">
+              <div class="snippet-header">
+                <strong>Extract archives</strong>
+                <span>nar unpack</span>
+              </div>
+              <pre><code>nar unpack ./dist/app.nar ./out --force --passThru
+nar unpack ./incoming.zip ./out --force
+nar unpack ./dist/app.nar ./preview --whatIf --passThru</code></pre>
+            </article>
+          </div>
+        </section>
+
+        <section class="block" id="api">
+          <h2>API</h2>
+          <p class="lede">
+            The API stays small on purpose: `pack()` writes archives, `unpack()`
+            reads them, and `outFormat` switches the pack target when `.nar` is
+            not the format you want.
+          </p>
+          <div class="snippet-grid api-snippet-grid">
+            <article class="snippet">
+              <div class="snippet-header">
+                <strong>Pack and unpack</strong>
+                <span>esm</span>
+              </div>
+              <pre><code>import { pack, unpack } from '@nodearchive/nodearchive'
+
+await pack({
+  literalPath: ['src', 'package.json'],
+  destinationPath: './dist/app.nar',
+  force: true,
+})
+
+await unpack({
+  path: './dist/app.nar',
+  destinationPath: './out',
+  force: true,
+})</code></pre>
+            </article>
+            <article class="snippet">
+              <div class="snippet-header">
+                <strong>Alternative output formats</strong>
+                <span>esm</span>
+              </div>
+              <pre><code>import { pack } from '@nodearchive/nodearchive'
+
+await pack({
+  literalPath: ['src'],
+  destinationPath: './dist/app.zip',
+  outFormat: 'zip',
+})
+
+await pack({
+  literalPath: ['src'],
+  destinationPath: './dist/app.tgz',
+})</code></pre>
+            </article>
+            <article class="snippet">
+              <div class="snippet-header">
+                <strong>Memory mode and incoming archives</strong>
+                <span>esm</span>
+              </div>
+              <pre><code>import { pack, unpack } from '@nodearchive/nodearchive'
+
+const archive = await pack({ blob: 'hello world' })
+const restored = await unpack({ blob: archive })
+
+await unpack({
+  path: './incoming.tar.gz',
+  destinationPath: './vendor',
+  force: true,
+})</code></pre>
+            </article>
+          </div>
+        </section>
+
+        <section class="block" id="features">
+          <h2>Behavior</h2>
+          <div class="runtime-grid">
+            <article class="card">
+              <strong>Path selection</strong>
+              <span>
+                `path` uses glob expansion through `fast-glob`, while
+                `literalPath` stays exact.
+              </span>
+            </article>
+            <article class="card">
+              <strong>Input shapes</strong>
+              <span>
+                In-memory mode accepts strings, blobs, typed arrays, array
+                buffers, and shared array buffers.
+              </span>
+            </article>
+            <article class="card">
+              <strong>Output formats and updates</strong>
+              <span>
+                `outFormat` or the destination extension picks the archive type.
+                `.gz` expects one input, `update` stays native to `.nar`, and
+                `whatIf` plans without writing.
+              </span>
+            </article>
+            <article class="card">
+              <strong>Safety</strong>
+              <span>
+                Unsafe extraction paths and unsupported archive entry types are
+                rejected instead of being silently rewritten.
+              </span>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span>Apache-2.0</span>
+        <span>
+          npm:
+          <a href="https://www.npmjs.com/package/@nodearchive/nodearchive"
+            >@nodearchive/nodearchive</a
+          >
+        </span>
+        <span>
+          repo:
+          <a href="https://github.com/nodearchive/nodearchive"
+            >nodearchive/nodearchive</a
+          >
+        </span>
+        <span><a href="/in-depth/">in-depth guide</a></span>
+        <span><a href="/coverage">coverage</a></span>
+      </footer>
+    </div>
   </body>
 </html>
